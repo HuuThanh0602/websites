@@ -12,6 +12,7 @@ use App\Repositories\Interfaces\OrderRepositoryInterface as OrderRepository;
 use App\Repositories\Interfaces\ProductVariantRepositoryInterface  as ProductVariantRepository;
 use Cart;
 use App\Mail\OrderMail;
+use App\Models\Product;
 
 /**
  * Class AttributeCatalogueService
@@ -114,19 +115,89 @@ class CartService  implements CartServiceInterface
             return false;
         }
     }
-
+    private function createOrderProduct($payload, $order, $request)
+    {
+        $carts = Cart::instance('shopping')->content();
+        $carts = $this->remakeCart($carts);
+        $temp = [];
+        
+        if (!empty($carts)) {
+            foreach ($carts as $key => $val) {
+                $extract = explode('_', $val->id);
+                $productId = $extract[0] ?? null;
+    
+                if (!$productId || !is_numeric($productId)) {
+                    continue; 
+                }
+    
+                $temp[] = [
+                    'product_id' => $productId,
+                    'uuid' => $extract[1] ?? null,
+                    'name' => $val->name,
+                    'qty' => $val->qty,
+                    'price' => $val->price,
+                    'user_id' => 1,
+                    'priceOriginal' => $val->priceOriginal ?? $val->price,
+                    'option' => json_encode($val->options),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+        if (!empty($temp)) {
+            $order->products()->createMany($temp); 
+        }
+        Product::orderBy('id', 'desc')->first()?->delete();
+    }
 
     public function order($request, $system)
     {
+        $productIds = $request->input('products', []);
+        $quantities = $request->input('quantities', []);
+        
+        $carts = [];
+        $totalPrice = 0; 
+        
+        foreach ($productIds as $key => $productId) {
+            $productLang = DB::table('product_language')
+                ->where('product_id', $productId)
+                ->where('language_id', 1)
+                ->value('name');
+        
+            $product = DB::table('products')->where('id', $productId)->first();
+        
+            if ($product) {
+                $subtotal = $product->price * ($quantities[$key] ?? 1); 
+        
+                $carts[] = [
+                    'product_id' => $productId,
+                    'name' => $productLang ?? $product->name, 
+                    'qty' => $quantities[$key] ?? 1,
+                    'price' => $product->price,
+                    'subtotal' => $subtotal,
+                ];
+        
+                $totalPrice += $subtotal; 
+            }
+        }
+        $result = [
+            'carts' => $carts,
+            'total_price' => $totalPrice
+        ];        
         DB::beginTransaction();
         try {
             $payload = $this->request($request);
             $order = $this->orderRepository->create($payload, ['products']);
             if ($order->id > 0) {
+
                 $this->createOrderProduct($payload, $order, $request);
-                $this->mail($order, $system);
+               
+                $this->mail($order, $system,$result);
+                
                 Cart::instance('shopping')->destroy();
+                
             }
+           
             DB::commit();
             return [
                 'order' => $order,
@@ -134,7 +205,6 @@ class CartService  implements CartServiceInterface
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            // Log::error($e->getMessage());
             echo $e->getMessage();
             die();
             return [
@@ -144,7 +214,7 @@ class CartService  implements CartServiceInterface
         }
     }
 
-    private function mail($order, $sytem)
+    private function mail($order, $sytem,$result)
     {
         $to = $order->email;
         $cc = $sytem['contact_email'];
@@ -154,38 +224,15 @@ class CartService  implements CartServiceInterface
         $cartPromotion = $this->cartPromotion($cartCaculate['cartTotal']);
         $data = [
             'order' => $order,
-            'carts' => $carts,
-            'cartCaculate' => $cartCaculate,
-            'cartPromotion' => $cartPromotion
+            'carts' => $result,
         ];
+        //  dd($data['carts']);
 
         \Mail::to($to)->cc($cc)->send(new OrderMail($data));
     }
 
-
-
-
-    private function createOrderProduct($payload, $order, $request)
-    {
-        $carts = Cart::instance('shopping')->content();
-        $carts = $this->remakeCart($carts);
-        $temp = [];
-        if (!is_null($carts)) {
-            foreach ($carts as $key => $val) {
-                $extract = explode('_', $val->id);
-                $temp[] = [
-                    'product_id' => $extract[0],
-                    'uuid' => ($extract[1]) ?? null,
-                    'name' => $val->name,
-                    'qty' => $val->qty,
-                    'price' => $val->price,
-                    'priceOriginal' => $val->priceOriginal,
-                    'option' => json_encode($val->options),
-                ];
-            }
-        }
-        $order->products()->sync($temp);
-    }
+    
+    
 
     private function request($request)
     {

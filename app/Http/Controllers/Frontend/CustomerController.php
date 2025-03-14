@@ -8,7 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Customer\EditProfileRequest;
 use App\Http\Requests\Customer\RecoverCustomerPasswordRequest;
+use App\Http\Requests\Customer\StoreCustomerRequest;
+use App\Models\Customer;
+use App\Models\CustomerCatalogue;
 use App\Models\Order;
+use App\Models\Province;
+use App\Models\Wallet;
+use App\Models\Wallet_transactions;
 use App\Services\Interfaces\CustomerServiceInterface  as CustomerService;
 use App\Services\Interfaces\ConstructServiceInterface  as ConstructService;
 use App\Repositories\Interfaces\ConstructRepositoryInterface  as ConstructRepository;
@@ -192,7 +198,7 @@ class CustomerController extends FrontendController
     {
         $customer = Auth::guard('customer')->user();
         $customerID = Auth::guard('customer')->id();
-        $orders = Order::where('customer_id', 5)->get();
+        $orders = Order::where('customer_id', $customerID)->get();
         $system = $this->system;
 
         $seo = [
@@ -209,8 +215,130 @@ class CustomerController extends FrontendController
             'orders'
         ));
     }
+
+    public function createCustomer(Request $request)
+    {
+
+        $customer = Auth::guard('customer')->user();
+        $code = Auth::guard('customer')->user()->code;
+        $system = $this->system;
+        $provinces=Province::all();
+
+        $seo = [
+            'meta_title' => 'Trang quản lý tài khoản khách hàng' . $customer['name'],
+            'meta_keyword' => '',
+            'meta_description' => '',
+            'meta_image' => '',
+            'canonical' => route('customer.profile')
+        ];
+        return view('frontend.auth.customer.create_customer', compact(
+            'seo',
+            'system',
+            'customer',
+            'code',
+            'provinces',
+        ));
+    }
+    public function store(StoreCustomerRequest $request)
+{
+    $customer = new Customer();
+    $customer->email = $request->email;
+    $customer->name = $request->name;
+    $customer->referral_by = $request->referral_by ?? null; 
+    $customer->code = time();
+    $customer->customer_catalogue_id = 1;
+    $customer->password = bcrypt($request->password);
+    $customer->phone = $request->phone;
+    $customer->address = $request->address;
+    $customer->birthday = $request->birthday;
+
+    $customer->save();
+
+    return redirect()->back()->with('success', 'Cộng tác viên đã được thêm mới thành công.');
+}
+
+
+    public function cancelOrder($id)
+    {
+        $customerID = Auth::guard('customer')->id();
+        $order = Order::where('id', $id)
+            ->where('customer_id', $customerID)
+            ->where('confirm', 'pending')
+            ->first();
+        if ($order) {
+            $order->update(['confirm' => 'cancel']);
+            return redirect()->back()->with('success', 'Đơn hàng đã được huỷ');
+        }
+
+        return redirect()->back()->with('error', 'Không thể huỷ đơn hàng');
+    }
     public function wallet()
     {
-        return view('frontend.auth.customer.wallet');
+        $customer = Auth::guard('customer')->user();
+        $customerID = Auth::guard('customer')->id();
+
+        $wallet = Wallet::where('customer_id', $customerID)->first();
+
+        if (!$wallet) {
+            $wallet = Wallet::create([
+                'customer_id' => $customerID,
+                'bank_account_name' => '',
+                'bank_account_number' => '',
+                'bank_name' => ''
+            ]);
+        }
+        $transactions = Wallet_transactions::where('wallet_id', $wallet->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $balance = 0;
+        foreach ($transactions as $transaction) {
+            if (in_array($transaction->type, ['commission', 'deposit'])) {
+                $balance += $transaction->amount;
+            } elseif (in_array($transaction->type, ['deduction', 'withdrawal'])) {
+                $balance -= $transaction->amount;
+            }
+        }
+
+        $system = $this->system;
+
+        $seo = [
+            'meta_title' => 'Trang quản lý tài khoản khách hàng ' . $customer->name,
+            'meta_keyword' => '',
+            'meta_description' => '',
+            'meta_image' => '',
+            'canonical' => route('customer.profile')
+        ];
+
+        return view('frontend.auth.customer.wallet', compact(
+            'seo',
+            'system',
+            'customer',
+            'wallet',
+            'transactions',
+            'balance'
+        ));
+    }
+
+    public function updateBankAccount(Request $request)
+    {
+        $request->validate([
+            'bank_account_name' => 'required|string|max:255',
+            'bank_account_number' => 'required|numeric',
+            'bank_name' => 'required|string|max:255',
+        ]);
+
+        $customerID = Auth::guard('customer')->id();
+        $wallet = Wallet::firstOrCreate(
+            ['customer_id' => $customerID],
+            ['bank_account_name' => '', 'bank_account_number' => '', 'bank_name' => '']
+        );
+
+        $wallet->update([
+            'bank_account_name' => $request->bank_account_name,
+            'bank_account_number' => $request->bank_account_number,
+            'bank_name' => $request->bank_name,
+        ]);
+
+        return redirect()->back()->with('success', 'Cập nhật tài khoản ngân hàng thành công!');
     }
 }

@@ -134,51 +134,45 @@
                                 <tr>
                                     <th class="uk-text-left">Tên sản phẩm</th>
                                     <th class="uk-text-center">Số lượng</th>
-                                    <th class="uk-text-right">Giá niêm yết</th>
+                                    <th class="uk-text-center">Giá niêm yết</th>
                                     <th class="uk-text-right">Giá bán</th>
                                     <th class="uk-text-right">Thành tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($data['carts'] as $key => $val)
-                                @php
-                                    $name = $val->name;
-                                    $qty = $val->qty;
-                                    $price = convert_price($val->price, true);
-                                    $priceOriginal = convert_price($val->priceOriginal, true);
-                                    $subtotal = convert_price($val->price * $qty, true);
-                                @endphp
-                                <tr>
-                                    <td class="uk-text-left">{{ $name }}</td>
-                                    <td class="uk-text-center">{{ $qty }}</td>
-                                    <td class="uk-text-right">{{ $priceOriginal }}đ</td>
-                                    <td class="uk-text-right">{{ $price }}đ</td>
-                                    <td class="uk-text-right"><strong>{{ $subtotal }}đ</strong></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="4">Mã giảm giá</td>
-                                    <td><strong>{{ $data['cartPromotion']['selectedPromotion']->code ?? '-' }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Tổng giá trị sản phẩm</td>
-                                    <td><strong>{{ convert_price($data['cartCaculate']['cartDiscount'] + $data['cartCaculate']['cartTotal'], true) }}đ</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Tổng giá trị khuyến mãi</td>
-                                    <td><strong>{{ convert_price($data['cartCaculate']['cartDiscount'], true) }}đ</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4">Phí giao hàng</td>
-                                    <td><strong>0đ</strong></td>
-                                </tr>
-                                <tr class="total_payment">
-                                    <td colspan="4"><span>Tổng thanh toán</span></td>
-                                    <td>{{ convert_price($data['cartCaculate']['cartTotal'], true) }}</td>
-                                </tr>
-                            </tfoot>
+                            @foreach($data['carts']['carts'] as $da)
+                            <tr>
+                                <td class="uk-text-left">{{ $da['name'] }}</td>
+                                <td class="uk-text-center">{{ $da['qty'] }}</td>
+                                <td class="uk-text-right">{{ $da['price'] }}đ</td>
+                                <td class="uk-text-right">{{ $da['price'] }}đ</td>
+                                <td class="uk-text-right"><strong>{{$da['subtotal'] }}đ</strong></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4">Mã giảm giá</td>
+                                <td><strong>{{-- $data['order']->promotion['code'] --}}</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">Tổng giá trị sản phẩm</td>
+                                <td><strong>{{-- data['carts']['total_price'] --}}0đ</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">Tổng giá trị khuyến mãi</td>
+                                <td><strong>{{-- convert_price($data['order']->promotion['discount'], true) --}}0đ</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">Phí giao hàng</td>
+                                <td><strong>0đ</strong></td>
+                            </tr>
+                           
+                            <tr class="total_payment">
+                                <td colspan="4"><span>Tổng thanh toán</span></td>
+                                <td>{{$data['carts']['total_price'] }}</td>
+                            </tr>
+                        </tfoot>
                         </table>
                     </div>
                 </div>

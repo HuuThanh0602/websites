@@ -60,7 +60,7 @@ class HomeController extends FrontendController
             ['keyword' => 'posts', 'object' => true],
         ], $this->language);
 
-        //dd($widgets);
+        // dd($widgets);
 
         $slides = $this->slideService->getSlide([SlideEnum::BANNER, SlideEnum::MAIN, 'banner'], $this->language);
         $system = $this->system;

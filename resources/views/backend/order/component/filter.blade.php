@@ -30,6 +30,9 @@
                     @include('backend.dashboard.component.keyword')
                 </div>
             </div>
+
         </div>
     </div>
 </form>
+<a href="{{ route('customer.order.create') }}" class="btn btn-danger"><i class="fa fa-plus mr5"></i>Thêm mới đơn hàng</a>
+

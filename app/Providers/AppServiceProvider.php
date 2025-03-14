@@ -58,13 +58,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        foreach($this->bindings as $key => $val)
-        {
+        foreach ($this->bindings as $key => $val) {
             $this->app->bind($key, $val);
         }
 
         $this->app->register(RepositoryServiceProvider::class);
-
     }
 
     /**
@@ -72,23 +70,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
+
         $locale = app()->getLocale(); // vn en cn
         $language = Language::where('canonical', $locale)->first();
 
-        Validator::extend('custom_date_format', function($attribute, $value, $parameters, $validator){
+        Validator::extend('custom_date_format', function ($attribute, $value, $parameters, $validator) {
             return Datetime::createFromFormat('d/m/Y H:i', $value) !== false;
         });
 
-        Validator::extend('custom_after', function($attribute, $value, $parameters, $validator){
+        Validator::extend('custom_after', function ($attribute, $value, $parameters, $validator) {
             $startDate = Carbon::createFromFormat('d/m/Y H:i', $validator->getData()[$parameters[0]]);
             $endDate = Carbon::createFromFormat('d/m/Y H:i', $value);
-            
+
             return $endDate->greaterThan($startDate) !== false;
         });
 
 
-        view()->composer('*', function($view) use ($language){
+        view()->composer('*', function ($view) use ($language) {
             $composerClasses = [
                 // SystemComposer::class,
                 MenuComposer::class,
@@ -101,15 +99,15 @@ class AppServiceProvider extends ServiceProvider
                 ProductCatalogueComposer::class,
             ];
 
-            foreach($composerClasses as $key => $val){
+            foreach ($composerClasses as $key => $val) {
                 $composer = app()->make($val, ['language' => $language->id]);
                 $composer->compose($view);
             }
         });
 
-      
 
-     
+
+
 
         Schema::defaultStringLength(191);
     }

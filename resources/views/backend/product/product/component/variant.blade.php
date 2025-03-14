@@ -98,16 +98,14 @@
 </div>
 
 <script>
-    var attributeCatalogue = @json($attributeCatalogue - > map(function($item) {
-        $name = $item - > attribute_catalogue_language - > first() - > name;
+    var attributeCatalogue = @json($attributeCatalogue->map(function($item) {
+        $name = optional($item->attribute_catalogue_language->first())->name;
         return [
-            'id' => $item - > id,
+            'id' => $item->id,
             'name' => $name
         ];
-    }) - > values());
+    })->values());
 
-    var attribute = '{{ base64_encode(json_encode(old('
-    attribute ') ?? (isset($product->attribute) ? $product->attribute : []))) }}';
-    var variant = '{{ base64_encode(json_encode(old('
-    variant ') ?? (isset($product->variant) ? json_decode($product->variant, TRUE) : []))) }}';
+    var attribute = '{{ base64_encode(json_encode(old("attribute") ?? ($product->attribute ?? []))) }}';
+    var variant = '{{ base64_encode(json_encode(old("variant") ?? (isset($product->variant) ? json_decode($product->variant, true) : []))) }}';
 </script>

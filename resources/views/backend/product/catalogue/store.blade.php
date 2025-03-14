@@ -19,8 +19,10 @@ $url = ($config['method'] == 'create') ? route('product.catalogue.store') : rout
                 @include('backend.dashboard.component.album', ['model' => ($productCatalogue) ?? null])
                 @include('backend.dashboard.component.seo', ['model' => ($productCatalogue) ?? null])
             </div>
+            <div></div>
             <div class="col-lg-3">
                 @include('backend.product.catalogue.component.aside')
+                thành tahnh
             </div>
         </div>
         @include('backend.dashboard.component.button')

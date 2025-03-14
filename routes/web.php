@@ -111,8 +111,14 @@ Route::group(['middleware' => 'license'], function () {
 
       Route::get('customer/order' . config('apps.general.suffix'), [FeCustomerController::class, 'order'])->name('customer.order');
       Route::get('customer/wallet' . config('apps.general.suffix'), [FeCustomerController::class, 'wallet'])->name('customer.wallet');
+      Route::get('customer/create' . config('apps.general.suffix'), [FeCustomerController::class, 'createCustomer'])->name('customer.createCustomer');
+      Route::post('/wallet/store' . config('apps.general.suffix'), [FeCustomerController::class, 'store'])->name('customer.store123');
+
+      Route::post('/wallet/update-bank' . config('apps.general.suffix'), [FeCustomerController::class, 'updateBankAccount'])->name('wallet.updateBank');
 
       Route::get('customer/profile' . config('apps.general.suffix'), [FeCustomerController::class, 'profile'])->name('customer.profile');
+      Route::delete('customer/{id}/cancelOrder' . config('apps.general.suffix'), [FeCustomerController::class, 'cancelOrder'])->name('customer.cancelOrder');
+
       Route::post('customer/profile/update' . config('apps.general.suffix'), [FeCustomerController::class, 'updateProfile'])->name('customer.profile.update');
       Route::get('customer/password/reset' . config('apps.general.suffix'), [FeCustomerController::class, 'passwordForgot'])->name('customer.password.change');
       Route::post('customer/password/recovery' . config('apps.general.suffix'), [FeCustomerController::class, 'recovery'])->name('customer.password.recovery');
@@ -427,6 +433,11 @@ Route::group(['middleware' => 'license'], function () {
       Route::group(['prefix' => 'order'], function () {
          Route::get('index', [OrderController::class, 'index'])->name('order.index');
          Route::get('{id}/detail', [OrderController::class, 'detail'])->where(['id' => '[0-9]+'])->name('order.detail');
+         Route::put('update-order-status/{code}', [OrderController::class, 'updateStatus'])->name('update-order-status');
+         Route::get('create', [OrderController::class, 'create'])->name('customer.order.create');
+         Route::post('store', [OrderController::class, 'store'])->name('customer.order.store');
+
+
       });
 
       /*CRM*/

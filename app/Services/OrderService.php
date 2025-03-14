@@ -34,7 +34,7 @@ class OrderService extends BaseService implements OrderServiceInterface
     
 
     public function paginate($request){
-        $condition['keyword'] = addslashes($request->input('keyword'));
+        $condition['keyword'] = !empty($request->input('keyword')) ? addslashes($request->input('keyword')) : '1';
         $condition['publish'] = $request->integer('publish');
         foreach(__('cart') as $key => $val){
             $condition['dropdown'][$key] = $request->string($key);
@@ -50,7 +50,6 @@ class OrderService extends BaseService implements OrderServiceInterface
             ['path' => 'order/index'], 
             ['id', 'desc'],
         );
-
         return $orders;
     }
 

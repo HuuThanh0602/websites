@@ -71,9 +71,11 @@
                     Tài khoản của tôi
                 </a>
                 <a href="{{ route('customer.password.change') }}" class="list-group-item list-group-item-action active" aria-current="true">Đổi mật khẩu</a>
-                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
                 <a href="{{ route('customer.wallet') }}" class="list-group-item list-group-item-action">Quản lý ví</a>
                 <a href="{{ route('customer.order') }}" class="list-group-item list-group-item-action">Đơn hàng</a>
+                <a href="{{ route('customer.createCustomer') }}" class="list-group-item list-group-item-action">Thêm mới cộng tác viên</a>
+                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
+
             </div>
 
         </div>
@@ -129,7 +131,7 @@
 
 
 
-                <div class="d-flex justify-content-start align-items-center" style="">
+                <div class="d-flex justify-content-start align-items-center">
                     <button type="submit" class="btn-main">Đổi mật khẩu</button>
 
                 </div>

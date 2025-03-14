@@ -37,6 +37,9 @@ class Product extends Model
 
     protected $table = 'products';
 
+    public function product_language(){
+        return $this->belongsTo(Product_language::class,'id','product_id');
+    }
     public function languages(){
         return $this->belongsToMany(Language::class, 'product_language' , 'product_id', 'language_id')
         ->withPivot(

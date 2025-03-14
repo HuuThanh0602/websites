@@ -29,17 +29,19 @@ class Menu extends Model
         'order' => 0,
     ];
 
-    public function languages(){
-        return $this->belongsToMany(Language::class, 'menu_language' , 'menu_id', 'language_id')
-        ->withPivot(
-            'menu_id',
-            'language_id',
-            'name',
-            'canonical',
-        )->withTimestamps();
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class, 'menu_language', 'menu_id', 'language_id')
+            ->withPivot(
+                'menu_id',
+                'language_id',
+                'name',
+                'canonical',
+            )->withTimestamps();
     }
 
-    public function menu_catalogues(){
+    public function menu_catalogues()
+    {
         return $this->belongsTo(MenuCatalogue::class, 'menu_catalogue_id', 'id');
     }
 }

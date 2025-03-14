@@ -88,11 +88,11 @@
                     Tài khoản của tôi
                 </a>
                 <a href="{{ route('customer.password.change') }}" class="list-group-item list-group-item-action">Đổi mật khẩu</a>
-                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
                 <a href="{{ route('customer.wallet') }}" class="list-group-item list-group-item-action">Quản lý ví</a>
                 <a href="{{ route('customer.order') }}" class="list-group-item list-group-item-action">Đơn hàng</a>
+                <a href="{{ route('customer.createCustomer') }}" class="list-group-item list-group-item-action ">Thêm mới cộng tác viên</a>
+                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
             </div>
-
         </div>
         <div class="col-12 col-md-8 col-lg-9 mx-auto">
             @include('backend/dashboard/component/formError')

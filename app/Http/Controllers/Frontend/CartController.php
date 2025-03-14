@@ -14,6 +14,7 @@ use App\Classes\Vnpay;
 use App\Classes\Momo;
 use App\Classes\Paypal;
 use App\Classes\Zalo;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends FrontendController
 {
@@ -56,7 +57,6 @@ class CartController extends FrontendController
         $carts = $this->cartService->remakeCart($carts);
         $cartCaculate = $this->cartService->reCaculateCart();
         $cartPromotion = $this->cartService->cartPromotion($cartCaculate['cartTotal']);
-
         $seo = [
             'meta_title' => 'Trang thanh toán đơn hàng',
             'meta_keyword' => '',
@@ -79,6 +79,8 @@ class CartController extends FrontendController
     }
 
     public function store(StoreCartRequest $request){
+        $customerID = Auth::guard('customer')->id();
+        $request['customer_id'] = $customerID;
         $system = $this->system;
         $order = $this->cartService->order($request, $system);
         if($order['flag']){

@@ -4,13 +4,14 @@
     <div class="row">
         <div class="col-12 col-md-4 col-lg-3 mx-auto">
             <div class="list-group">
-                <a href="{{ route('customer.profile') }}" class="list-group-item list-group-item-action active" aria-current="true">
+                <a href="{{ route('customer.profile') }}" class="list-group-item list-group-item-action" aria-current="true">
                     Tài khoản của tôi
                 </a>
                 <a href="{{ route('customer.password.change') }}" class="list-group-item list-group-item-action">Đổi mật khẩu</a>
-                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
                 <a href="{{ route('customer.wallet') }}" class="list-group-item list-group-item-action">Quản lý ví</a>
-                <a href="{{ route('customer.order') }}" class="list-group-item list-group-item-action">Đơn hàng</a>
+                <a href="{{ route('customer.order') }}" class="list-group-item list-group-item-action active">Đơn hàng</a>
+                <a href="{{ route('customer.createCustomer') }}" class="list-group-item list-group-item-action">Thêm mới cộng tác viên</a>
+                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
             </div>
 
         </div>
@@ -21,17 +22,22 @@
                 <thead>
                     <tr>
                         <th>Mã đơn hàng</th>
-                        <th>Địa chỉ</th>
+                        <th>Người nhận</th>
                         <th>Tình trạng</th>
                         <th>Thanh toán</th>
                         <th>Vận chuyển</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($orders as $order)
                     <tr>
                         <td>{{$order->code}}</td>
-                        <td>{{$order->address}}</td>
+                        <td>
+                            <div><b>N:</b> {{ $order->fullname }}</div>
+                            <div><b>P:</b> {{ $order->phone }}</div>
+                            <div><b>A:</b> {{ $order->address }}</div>
+                        </td>
                         <td>
                             @if($order->confirm == 'pending')
                             Đang chờ xác nhận
@@ -63,12 +69,41 @@
                             Trạng thái giao hàng không xác định
                             @endif
                         </td>
+                        <td>
+                            @if($order->confirm == 'pending')
+                            <button type="button" class="btn btn-danger" style="width:80px" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{$order->id}}">
+                                Hủy đơn
+                            </button>
+                            <div class="modal fade" id="cancelOrderModal{{$order->id}}" tabindex="-1" aria-labelledby="cancelOrderLabel{{$order->id}}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="cancelOrderLabel{{$order->id}}">Xác nhận hủy đơn hàng</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Bạn có chắc chắn muốn hủy đơn hàng này không?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                                            <form action="{{ route('customer.cancelOrder', $order->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Có, Hủy đơn</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @else
+                            <button class="btn btn-secondary" style="width:80px" disabled>Hủy đơn</button>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>
 
