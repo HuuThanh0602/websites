@@ -4,18 +4,24 @@ $segment = request()->segment(1);
 <nav class="navbar-default navbar-static-side" role="navigation">
     <div class="sidebar-collapse">
         <ul class="nav metismenu" id="side-menu">
-            <li class="nav-header">
-                <div class="dropdown profile-element"> <span>
-                        <img alt="image" class="img-circle" src="backend/img/profile_small.jpg" />
+            <li class="nav-header">           
+                <div class="dropdown profile-element"> <span>         
                     </span>
-                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                        <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">{{ auth()->user()->name }}</strong>
-                            </span> <span class="text-muted text-xs block">Cài đặt <b class="caret"></b></span> </span> </a>
+                    <a href="#" class="dropdown-toggle d-flex align-items-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        
+                        <div class="ml-2 text-center">
+                        <img alt="avatar" class="img-circle" src="{{ asset(auth()->user()->image) }}" width="50" height="50"><br>
+                            <strong class="font-bold">{{ auth()->user()->name }}</strong>
+                            <div class="text-muted text-xs">Cài đặt <b class="caret"></b></div>
+                        </div>
+                        </a>
+
+
                     <ul class="dropdown-menu animated fadeInRight m-t-xs">
-                        <li><a href="">Hồ sơ</a></li>
+                        <li><a href="">Hồ sơ cá nhân</a></li>
 
                         <li class="divider"></li>
-                        <li><a href="{{ route('auth.logout') }}">Logout</a></li>
+                        <li><a href="{{ route('auth.logout') }}">Đăng xuất</a></li>
                     </ul>
                 </div>
                 <div class="logo-element">

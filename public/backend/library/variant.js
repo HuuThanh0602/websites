@@ -3,23 +3,42 @@
 	var HT = {}; 
 
     HT.setupProductVariant = () => {
-        if($('.turnOnVariant').length){
-            $(document).on('click', '.turnOnVariant', function(){
-                let _this = $(this)
-                let price = $('input[name=price]').val()
-                let code = $('input[name=code]').val()
-                if(price == '' || code == ''){
-                    alert('Bạn phải nhập vào Giá và Mã sản phẩm để sử dụng chức năng này')
-                    return false
-                }
+        $(document).on('click', '.turnOnVariant', function(e){
+            let _this = $(this);
+            let checkbox = _this.siblings('input[type="checkbox"]');
+            let price = $('input[name="price"]').val();
+            let code = $('input[name="code"]').val();
 
-                if(_this.siblings('input:checked').length == 0){
-                    $('.variant-wrapper').removeClass('hidden')
-                }else{
-                    $('.variant-wrapper').addClass('hidden')
-                }
-            })
-        }
+            if(price === '' || code === ''){
+                alert('Bạn phải nhập vào Giá và Mã sản phẩm để sử dụng chức năng này');
+                checkbox.prop('checked', false);
+                return false;
+            }
+
+            if(checkbox.is(':checked')){
+                $('.variant-wrapper').removeClass('hidden');
+            } else {
+                $('.variant-wrapper').addClass('hidden');
+            }
+        });
+
+        $(document).on('change', '.variantInputCheckbox', function(){
+            let _this = $(this);
+            let price = $('input[name="price"]').val();
+            let code = $('input[name="code"]').val();
+
+            if(price === '' || code === ''){
+                alert('Bạn phải nhập vào Giá và Mã sản phẩm để sử dụng chức năng này');
+                _this.prop('checked', false);
+                return false;
+            }
+
+            if(_this.is(':checked')){
+                $('.variant-wrapper').removeClass('hidden');
+            } else {
+                $('.variant-wrapper').addClass('hidden');
+            }
+        });
     }
 
     HT.addVariant = () => {
@@ -37,24 +56,24 @@
 
     HT.renderVariantItem = (attributeCatalogue) => {
         let html = '';
-        html = html + '<div class="row mb20 variant-item">';
-            html = html + '<div class="col-lg-3">';
-                html = html + '<div class="attribute-catalogue">';
-                    html = html + '<select name="attributeCatalogue[]" id="" class="choose-attribute niceSelect">';
-                        html = html + '<option value="">Chọn Nhóm thuộc tính</option>';
+        html += '<div class="row mb20 variant-item">';
+            html += '<div class="col-lg-3">';
+                html += '<div class="attribute-catalogue">';
+                    html += '<select name="attributeCatalogue[]" id="" class="choose-attribute niceSelect">';
+                        html += '<option value="">Chọn Nhóm thuộc tính</option>';
                         for(let i = 0; i < attributeCatalogue.length; i++){
-                        html = html + '<option value="'+attributeCatalogue[i].id+'">'+attributeCatalogue[i].name+'</option>';
+                        html += '<option value="'+attributeCatalogue[i].id+'">'+attributeCatalogue[i].name+'</option>';
                         }
-                    html = html + '</select>';
-                html = html + '</div>';
-            html = html + '</div>';
-            html = html + '<div class="col-lg-8">';
-                html = html + '<input type="text" name="" disabled class="fake-variant form-control">';
-            html = html + '</div>';
-            html = html + '<div class="col-lg-1">';
-                html = html + '<button type="button" class="remove-attribute btn btn-danger"><svg data-icon="TrashSolidLarge" aria-hidden="true" focusable="false" width="15" height="16" viewBox="0 0 15 16" class="bem-Svg" style="display: block;"><path fill="currentColor" d="M2 14a1 1 0 001 1h9a1 1 0 001-1V6H2v8zM13 2h-3a1 1 0 01-1-1H6a1 1 0 01-1 1H1v2h13V2h-1z"></path></svg></button>';
-            html = html + '</div>';
-        html = html + '</div>';
+                    html += '</select>';
+                html += '</div>';
+            html += '</div>';
+            html += '<div class="col-lg-8">';
+                html += '<input type="text" name="" disabled class="fake-variant form-control">';
+            html += '</div>';
+            html += '<div class="col-lg-1">';
+                html += '<button type="button" class="remove-attribute btn btn-danger"><svg data-icon="TrashSolidLarge" aria-hidden="true" focusable="false" width="15" height="16" viewBox="0 0 15 16" class="bem-Svg" style="display: block;"><path fill="currentColor" d="M2 14a1 1 0 001 1h9a1 1 0 001-1V6H2v8zM13 2h-3a1 1 0 01-1-1H6a1 1 0 01-1 1H1v2h13V2h-1z"></path></svg></button>';
+            html += '</div>';
+        html += '</div>';
 
         return html;
     }
@@ -76,7 +95,6 @@
         })
     }
 
-
     HT.createProductVariant = () => {
         $(document).on('change', '.selectVariant', function(){
             let _this = $(this)
@@ -85,11 +103,9 @@
     }
 
     HT.createVariant = (remove) => {
-
         let attributes = []
         let variants = []
         let attributeTitle = []
-
 
         if($('.variant-item').length ){
             $('.variant-item').each(function(){
@@ -99,7 +115,6 @@
                 let attributeCatalogueId = _this.find('.choose-attribute').val()
                 let optionText = _this.find('.choose-attribute option:selected').text()
                 let attribute = $('.variant-'+attributeCatalogueId).select2('data')
-    
     
                 for(let i = 0; i < attribute.length; i++){
                     let item = {}
@@ -112,10 +127,7 @@
                 attributeTitle.push(optionText)
                 attributes.push(attr)
                 variants.push(attrVariant)
-    
             })
-    
-            // console.log(attributes);
     
             attributes = attributes.reduce(
                 (a, b) => a.flatMap( d => b.map( e => ( {...d, ...e} ) ) )
@@ -138,7 +150,6 @@
                 }
             });
     
-    
             $('table.variantTable tbody tr').each(function(){
                 const $row = $(this)
                 const rowClasses = $row.attr('class')
@@ -155,17 +166,11 @@
                     if(shouldRemove){
                         $row.remove()
                     }
-    
                 }
             })
         }else{
-
             $('.product-variant .ibox-content').html('')
         }
-        
-
-        // let html = HT.renderTableHtml(attributes, attributeTitle, variants);
-        // $('table.variantTable').html(html)
     }
 
     HT.createVariantRow = (attributeItem, variantItem) => {
@@ -190,24 +195,23 @@
 
         $td = $('<td>').addClass('hidden td-variant')
 
-
-        let mainPrice = $('input[name=price]').val()
+        let mainPrice = $('input[name=order_price]').val()
         let mainSku = $('input[name=code]').val()
         let inputHiddenFields = [
-            { name: 'variant[quantity][]', class: 'variant_quantity' },
-            { name: 'variant[sku][]', class: 'variant_sku', value: mainSku + '-' +  classModified },
+            { name: 'variant[quantity][]', class: 'variant_quantity', value: '' },
+            { name: 'variant[sku][]', class: 'variant_sku', value: mainSku + '-' + classModified },
             { name: 'variant[price][]', class: 'variant_price', value: mainPrice },
-            { name: 'variant[barcode][]', class: 'variant_barcode' },
-            { name: 'variant[file_name][]', class: 'variant_filename' },
-            { name: 'variant[file_url][]', class: 'variant_fileurl' },
-            { name: 'variant[album][]', class: 'variant_album' },
+            { name: 'variant[barcode][]', class: 'variant_barcode', value: '' },
+            { name: 'variant[file_name][]', class: 'variant_filename', value: '' },
+            { name: 'variant[file_url][]', class: 'variant_fileurl', value: '' },
+            { name: 'variant[album][]', class: 'variant_album', value: '' },
             { name: 'productVariant[name][]', value: attributeString },
             { name: 'productVariant[id][]', value: attributeId },
         ]
 
         $.each(inputHiddenFields, function(_, field){
-            let $input = $('<input>').attr('type', 'text').attr('name', field.name).addClass(field.class)
-            if(field.value){
+            let $input = $('<input>').attr('type', 'hidden').attr('name', field.name).addClass(field.class)
+            if(field.value !== undefined){
                 $input.val(field.value)
             }
             $td.append($input)
@@ -215,7 +219,7 @@
 
         $row.append($('<td>').addClass('td-quantity').text('-'))
             .append($('<td>').addClass('td-price').text(mainPrice))
-            .append($('<td>').addClass('td-sku').text(mainSku + '-' +  classModified))
+            .append($('<td>').addClass('td-sku').text(mainSku + '-' + classModified))
             .append($td)
         return $row
     }
@@ -224,7 +228,7 @@
         let $thead = $('table.variantTable thead')
         let $row = $('<tr>')
         $row.append($('<td>').text('Hình Ảnh'))
-        for(let i  = 0; i < attributeTitle.length; i++){
+        for(let i = 0; i < attributeTitle.length; i++){
             $row.append($('<td>').text(attributeTitle[i]))
         }
 
@@ -234,10 +238,7 @@
 
         $thead.html($row)
         return $thead
-
     }
-
-    
 
     HT.getSelect2 = (object) => {
         let option = {
@@ -250,7 +251,7 @@
                 url: 'ajax/attribute/getAttribute',
                 type: 'GET',
                 dataType: 'json',
-                deley: 250,
+                delay: 250,
                 data: function (params){
                     return {
                         search: params.term,
@@ -263,8 +264,7 @@
                     }
                 },
                 cache: true
-              
-              }
+            }
         });
     }
 
@@ -287,7 +287,6 @@
                 id.push(selected)
             }
         })
-
 
         $('.choose-attribute').find('option').removeAttr('disabled')
         for(let i = 0; i < id.length; i++){
@@ -333,13 +332,13 @@
         var finder = new CKFinder();
         
         finder.resourceType = type;
-        finder.selectActionFunction = function( fileUrl, data, allFiles ) {
+        finder.selectActionFunction = function(fileUrl, data, allFiles) {
             let html = '';
             for(var i = 0; i < allFiles.length; i++){
                 var image = allFiles[i].url
                 html += '<li class="ui-state-default">'
-                   html += ' <div class="thumb">'
-                       html += ' <span class="span image img-scaledown">'
+                   html += '<div class="thumb">'
+                       html += '<span class="span image img-scaledown">'
                             html += '<img src="'+image+'" alt="'+image+'">'
                             html += '<input type="hidden" name="variantAlbum[]" value="'+image+'">'
                         html += '</span>'
@@ -382,7 +381,7 @@
         $(document).on('click', '.variant-row', function(){
             let _this = $(this)
             let variantData = {}
-            _this.find(".td-variant input[type=text][class^='variant_']").each(function(){
+            _this.find(".td-variant input[type=hidden][class^='variant_']").each(function(){
                 let className = $(this).attr('class')
                 variantData[className] = $(this).val()
             })
@@ -398,111 +397,108 @@
 
     HT.switchery = () => {
         $('.js-switch').each(function(){
-            // let _this = $(this)
             var switchery = new Switchery(this, { color: '#1AB394', size: 'small'});
         })
     }
 
     HT.variantAlbumList = (album) => {
         let html = ''
-
         if(album.length && album[0] !== '' && album[0] != '0'){
-            for(let i = 0 ; i < album.length; i++){
-                html = html + '<li class="ui-state-default"> '
-                    html = html + '<div class="thumb"> '
-                        html = html + '<span class="span image img-scaledown">'
-                            html = html + '<img src="'+album[i]+'" alt="'+album[i]+'">'
-                                html = html + '<input type="hidden" name="variantAlbum[]" value="'+album[i]+'">'
-                        html = html + '</span>'
-                        html = html + '<button class="variant-delete-image"><i class="fa fa-trash"></i>'
-                        html = html + '</button>'
-                    html = html + '</div>'
-                html = html + '</li>'
+            for(let i = 0; i < album.length; i++){
+                html += '<li class="ui-state-default">'
+                    html += '<div class="thumb">'
+                        html += '<span class="span image img-scaledown">'
+                            html += '<img src="'+album[i]+'" alt="'+album[i]+'">'
+                            html += '<input type="hidden" name="variantAlbum[]" value="'+album[i]+'">'
+                        html += '</span>'
+                        html += '<button class="variant-delete-image"><i class="fa fa-trash"></i>'
+                        html += '</button>'
+                    html += '</div>'
+                html += '</li>'
             }
         }
-
         return html
     }
 
     HT.updateVariantHtml = (variantData) => {
-        let variantAlbum = variantData.variant_album.split(',')
+        let variantAlbum = variantData.variant_album ? variantData.variant_album.split(',') : [];
         let variantAlbumItem = HT.variantAlbumList(variantAlbum);
         let html = ''
         let colspan = $('.variantTable thead tr td').length
-        html = html + '<tr class="updateVariantTr">'
-            html = html + '<td colspan="'+colspan+'">'
-                html = html + '<div class="updateVariant ibox">'
-                    html = html + '<div class="ibox-title">'
-                        html = html + '<div class="uk-flex uk-flex-middle uk-flex-space-between">'
-                            html = html + '<h5>Cập nhật thông tin phiên bản</h5>'
-                            html = html + '<div class="button-group">'
-                                html = html + '<div class="uk-flex uk-flex-middle">'
-                                    html = html + '<button type="button" class="cancleUpdate btn btn-danger mr10">Hủy bỏ</button>'
-                                    html = html + '<button type="button" class="saveUpdateVariant btn btn-success">Lưu lại</button>'
-                                html = html + '</div>'
-                            html = html + '</div>'
-                        html = html + '</div>'
-                    html = html + '</div>'
-                    html = html + '<div class="ibox-content">'
-                        html = html + '<div class="click-to-upload-variant '+ ( (variantAlbum.length > 0 && variantAlbum[0] !== '' && variantAlbum[0] !== '0') ? 'hidden' : '' )  +'">'
-                            html = html + '<div class="icon">'
-                                html = html + '<a type="button" class="upload-variant-picture">'
-                                    html = html + '<svg style="width:80px;height:80px;fill: #d3dbe2;margin-bottom: 10px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M80 57.6l-4-18.7v-23.9c0-1.1-.9-2-2-2h-3.5l-1.1-5.4c-.3-1.1-1.4-1.8-2.4-1.6l-32.6 7h-27.4c-1.1 0-2 .9-2 2v4.3l-3.4.7c-1.1.2-1.8 1.3-1.5 2.4l5 23.4v20.2c0 1.1.9 2 2 2h2.7l.9 4.4c.2.9 1 1.6 2 1.6h.4l27.9-6h33c1.1 0 2-.9 2-2v-5.5l2.4-.5c1.1-.2 1.8-1.3 1.6-2.4zm-75-21.5l-3-14.1 3-.6v14.7zm62.4-28.1l1.1 5h-24.5l23.4-5zm-54.8 64l-.8-4h19.6l-18.8 4zm37.7-6h-43.3v-51h67v51h-23.7zm25.7-7.5v-9.9l2 9.4-2 .5zm-52-21.5c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3zm-13-10v43h59v-43h-59zm57 2v24.1l-12.8-12.8c-3-3-7.9-3-11 0l-13.3 13.2-.1-.1c-1.1-1.1-2.5-1.7-4.1-1.7-1.5 0-3 .6-4.1 1.7l-9.6 9.8v-34.2h55zm-55 39v-2l11.1-11.2c1.4-1.4 3.9-1.4 5.3 0l9.7 9.7c-5.2 1.3-9 2.4-9.4 2.5l-3.7 1h-13zm55 0h-34.2c7.1-2 23.2-5.9 33-5.9l1.2-.1v6zm-1.3-7.9c-7.2 0-17.4 2-25.3 3.9l-9.1-9.1 13.3-13.3c2.2-2.2 5.9-2.2 8.1 0l14.3 14.3v4.1l-1.3.1z"></path></svg>'
-                                html = html + '</a>'
-                            html = html + '</div>'
-                            html = html + '<div class="small-text">Sử dụng nút chọn hình để thêm mới hình ảnh</div>'
-                        html = html + '</div>'
-                       html = html + ' <ul class="upload-variant-list '+ ( (variantAlbumItem.length) ? '' : 'hidden' ) +' sortui ui-sortable clearfix " id="sortable2">'+variantAlbumItem+'</ul>'
-                        html = html + '<div class="row mt20 uk-flex uk-flex-middle">'
-                            html = html + '<div class="col-lg-2 uk-flex uk-flex-middle">'
-                                html = html + '<label for="" class="mr10">Tồn kho</label>'
-                                html = html + '<input type="checkbox" class="js-switch" '+( (variantData.variant_quantity !== '') ? 'checked' : '' )+' data-target="variantQuantity">'
-                            html = html + '</div>'
-                            html = html + '<div class="col-lg-10">'
-                                html = html + '<div class="row">'
-                                    html = html + '<div class="col-lg-3">'
-                                        html = html + '<label for="" class="control-label">Số lượng</label>'
-                                        html = html + '<input type="text" '+ ( (variantData.variant_quantity == '') ? 'disabled' : '' ) +'  name="variant_quantity" value="'+variantData.variant_quantity+'" class="form-control '+ ( (variantData.variant_quantity == '') ? 'disabled' : '' ) +' int">'
-                                    html = html + '</div>'
-                                    html = html + '<div class="col-lg-3">'
-                                        html = html + '<label for="" class="control-label">SKU</label>'
-                                        html = html + '<input type="text" name="variant_sku" value="'+ variantData.variant_sku +'" class="form-control text-right">'
-                                    html = html + '</div>'
-                                    html = html + '<div class="col-lg-3">'
-                                        html = html + '<label for="" class="control-label">Giá</label>'
-                                        html = html + '<input type="text" name="variant_price" value="'+ HT.addCommas(variantData.variant_price) +'" class="form-control int">'
-                                    html = html + '</div>'
-                                    html = html + '<div class="col-lg-3">'
-                                        html = html + '<label for="" class="control-label">Barcode</label>'
-                                        html = html + '<input type="text" name="variant_barcode" value="'+ variantData.variant_barcode +'" class="form-control text-right">'
-                                    html = html + '</div>'
-                                html = html + '</div>'
-                            html = html + '</div>'
-                        html = html + '</div>'
-                        html = html + '<div class="row mt20 uk-flex uk-flex-middle">'
-                            html = html + '<div class="col-lg-2 uk-flex uk-flex-middle">'
-                                html = html + '<label for="" class="mr10">QL File</label>'
-                                html = html + '<input type="checkbox" class="js-switch" data-target="disabled" '+( (variantData.variant_filename !== '') ? 'checked' : '' )+'>'
-                            html = html + '</div>'
-                            html = html + '<div class="col-lg-10">'
-                                html = html + '<div class="row">'
-                                    html = html + '<div class="col-lg-6">'
-                                        html = html + '<label for="" class="control-label">Tên File</label>'
-                                        html = html + '<input type="text" '+ ( (variantData.variant_filename == '') ? 'disabled' : '' ) +' name="variant_file_name" value="'+ variantData.variant_filename +'" class="form-control '+ ( (variantData.variant_filename == '') ? 'disabled' : '' ) +'">'
-                                    html = html + '</div>'
-                                    html = html + '<div class="col-lg-6">'
-                                        html = html + '<label for="" class="control-label">Đường dẫn</label>'
-                                        html = html + '<input type="text" '+ ( (variantData.variant_filename == '') ? 'disabled' : '' ) +' name="variant_file_url" value="'+ variantData.variant_fileurl +'" class="form-control '+ ( (variantData.variant_filename == '') ? 'disabled' : '' ) +'">'
-                                    html = html + '</div>'
-                               html = html + ' </div>'
-                            html = html + '</div>'
-                        html = html + '</div>'
-                    html = html + '</div>'
-                html = html + '</div>'
-            html = html + '</td>'
-        html = html + '</tr>'
+        html += '<tr class="updateVariantTr">'
+            html += '<td colspan="'+colspan+'">'
+                html += '<div class="updateVariant ibox">'
+                    html += '<div class="ibox-title">'
+                        html += '<div class="uk-flex uk-flex-middle uk-flex-space-between">'
+                            html += '<h5>Cập nhật thông tin phiên bản</h5>'
+                            html += '<div class="button-group">'
+                                html += '<div class="uk-flex uk-flex-middle">'
+                                    html += '<button type="button" class="cancleUpdate btn btn-danger mr10">Hủy bỏ</button>'
+                                    html += '<button type="button" class="saveUpdateVariant btn btn-success">Lưu lại</button>'
+                                html += '</div>'
+                            html += '</div>'
+                        html += '</div>'
+                    html += '</div>'
+                    html += '<div class="ibox-content">'
+                        html += '<div class="click-to-upload-variant '+((variantAlbum.length > 0 && variantAlbum[0] !== '' && variantAlbum[0] !== '0') ? 'hidden' : '')+'">'
+                            html += '<div class="icon">'
+                                html += '<a type="button" class="upload-variant-picture">'
+                                    html += '<svg style="width:80px;height:80px;fill: #d3dbe2;margin-bottom: 10px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M80 57.6l-4-18.7v-23.9c0-1.1-.9-2-2-2h-3.5l-1.1-5.4c-.3-1.1-1.4-1.8-2.4-1.6l-32.6 7h-27.4c-1.1 0-2 .9-2 2v4.3l-3.4.7c-1.1.2-1.8 1.3-1.5 2.4l5 23.4v20.2c0 1.1.9 2 2 2h2.7l.9 4.4c.2.9 1 1.6 2 1.6h.4l27.9-6h33c1.1 0 2-.9 2-2v-5.5l2.4-.5c1.1-.2 1.8-1.3 1.6-2.4zm-75-21.5l-3-14.1 3-.6v14.7zm62.4-28.1l1.1 5h-24.5l23.4-5zm-54.8 64l-.8-4h19.6l-18.8 4zm37.7-6h-43.3v-51h67v51h-23.7zm25.7-7.5v-9.9l2 9.4-2 .5zm-52-21.5c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3zm-13-10v43h59v-43h-59zm57 2v24.1l-12.8-12.8c-3-3-7.9-3-11 0l-13.3 13.2-.1-.1c-1.1-1.1-2.5-1.7-4.1-1.7-1.5 0-3 .6-4.1 1.7l-9.6 9.8v-34.2h55zm-55 39v-2l11.1-11.2c1.4-1.4 3.9-1.4 5.3 0l9.7 9.7c-5.2 1.3-9 2.4-9.4 2.5l-3.7 1h-13zm55 0h-34.2c7.1-2 23.2-5.9 33-5.9l1.2-.1v6zm-1.3-7.9c-7.2 0-17.4 2-25.3 3.9l-9.1-9.1 13.3-13.3c2.2-2.2 5.9-2.2 8.1 0l14.3 14.3v4.1l-1.3 .1z"></path></svg>'
+                                html += '</a>'
+                            html += '</div>'
+                            html += '<div class="small-text">Sử dụng nút chọn hình để thêm mới hình ảnh</div>'
+                        html += '</div>'
+                        html += '<ul class="upload-variant-list '+((variantAlbumItem.length) ? '' : 'hidden')+' sortui ui-sortable clearfix" id="sortable2">'+variantAlbumItem+'</ul>'
+                        html += '<div class="row mt20 uk-flex uk-flex-middle">'
+                            html += '<div class="col-lg-2 uk-flex uk-flex-middle">'
+                                html += '<label for="" class="mr10">Tồn kho</label>'
+                                html += '<input type="checkbox" class="js-switch" '+(variantData.variant_quantity !== '' && variantData.variant_quantity !== null ? 'checked' : '')+' data-target="variantQuantity">'
+                            html += '</div>'
+                            html += '<div class="col-lg-10">'
+                                html += '<div class="row">'
+                                    html += '<div class="col-lg-3">'
+                                        html += '<label for="" class="control-label">Số lượng</label>'
+                                        html += '<input type="text" '+(variantData.variant_quantity == '' || variantData.variant_quantity == null ? 'disabled' : '')+' name="variant_quantity" value="'+(variantData.variant_quantity || '')+'" class="form-control '+(variantData.variant_quantity == '' || variantData.variant_quantity == null ? 'disabled' : '')+' int">'
+                                    html += '</div>'
+                                    html += '<div class="col-lg-3">'
+                                        html += '<label for="" class="control-label">SKU</label>'
+                                        html += '<input type="text" name="variant_sku" value="'+variantData.variant_sku+'" class="form-control text-right">'
+                                    html += '</div>'
+                                    html += '<div class="col-lg-3">'
+                                        html += '<label for="" class="control-label">Giá</label>'
+                                        html += '<input type="text" name="variant_price" value="'+HT.addCommas(variantData.variant_price)+'" class="form-control int">'
+                                    html += '</div>'
+                                    html += '<div class="col-lg-3">'
+                                        html += '<label for="" class="control-label">Barcode</label>'
+                                        html += '<input type="text" name="variant_barcode" value="'+variantData.variant_barcode+'" class="form-control text-right">'
+                                    html += '</div>'
+                                html += '</div>'
+                            html += '</div>'
+                        html += '</div>'
+                        html += '<div class="row mt20 uk-flex uk-flex-middle">'
+                            html += '<div class="col-lg-2 uk-flex uk-flex-middle">'
+                                html += '<label for="" class="mr10">QL File</label>'
+                                html += '<input type="checkbox" class="js-switch" data-target="disabled" '+(variantData.variant_filename !== '' && variantData.variant_filename !== null ? 'checked' : '')+'>'
+                            html += '</div>'
+                            html += '<div class="col-lg-10">'
+                                html += '<div class="row">'
+                                    html += '<div class="col-lg-6">'
+                                        html += '<label for="" class="control-label">Tên File</label>'
+                                        html += '<input type="text" '+(variantData.variant_filename == '' || variantData.variant_filename == null ? 'disabled' : '')+' name="variant_file_name" value="'+(variantData.variant_filename || '')+'" class="form-control '+(variantData.variant_filename == '' || variantData.variant_filename == null ? 'disabled' : '')+'">'
+                                    html += '</div>'
+                                    html += '<div class="col-lg-6">'
+                                        html += '<label for="" class="control-label">Đường dẫn</label>'
+                                        html += '<input type="text" '+(variantData.variant_filename == '' || variantData.variant_filename == null ? 'disabled' : '')+' name="variant_file_url" value="'+(variantData.variant_fileurl || '')+'" class="form-control '+(variantData.variant_filename == '' || variantData.variant_filename == null ? 'disabled' : '')+'">'
+                                    html += '</div>'
+                                html += '</div>'
+                            html += '</div>'
+                        html += '</div>'
+                    html += '</div>'
+                html += '</div>'
+            html += '</td>'
+        html += '</tr>'
 
-        return  html
+        return html
     }
 
     HT.cancleVariantUpdate = () => {
@@ -516,80 +512,70 @@
     }
 
     HT.addCommas = (nStr) => { 
-        nStr = String(nStr);
+        nStr = String(nStr || '');
         nStr = nStr.replace(/\./gi, "");
         let str ='';
         for (let i = nStr.length; i > 0; i -= 3){
-            let a = ( (i-3) < 0 ) ? 0 : (i-3);
-            str= nStr.slice(a,i) + '.' + str;
+            let a = ((i-3) < 0) ? 0 : (i-3);
+            str = nStr.slice(a,i) + '.' + str;
         }
-        str= str.slice(0,str.length-1);
-        return str;
+        str = str.slice(0, str.length-1);
+        return str || '0';
     }
     
     HT.saveVariantUpdate = () => {
         $(document).on('click', '.saveUpdateVariant', function(){
+            let $updateRow = $(this).closest('.updateVariantTr');
+            let $prevRow = $updateRow.prev();
 
+            let quantityInput = $updateRow.find('input[name=variant_quantity]');
+            let isQuantityEnabled = !$updateRow.find('.js-switch[data-target="variantQuantity"]').prop('checked');
             let variant = {
-                'quantity' : $('input[name=variant_quantity]').val(),
-                'sku' : $('input[name=variant_sku]').val(),
-                'price' : $('input[name=variant_price]').val(),
-                'barcode' : $('input[name=variant_barcode]').val(),
-                'filename' : $('input[name=variant_file_name]').val(),
-                'fileurl' : $('input[name=variant_file_url]').val(),
-                'album' : $("input[name='variantAlbum[]']").map(function(){
-                    return $(this).val()
+                'quantity': isQuantityEnabled ? '' : (quantityInput.val() || ''),
+                'sku': $updateRow.find('input[name=variant_sku]').val() || '',
+                'price': $updateRow.find('input[name=variant_price]').val().replace(/\./g, '') || '',
+                'barcode': $updateRow.find('input[name=variant_barcode]').val() || '',
+                'filename': $updateRow.find('input[name=variant_file_name]').val() || '',
+                'fileurl': $updateRow.find('input[name=variant_file_url]').val() || '',
+                'album': $updateRow.find("input[name='variantAlbum[]']").map(function(){
+                    return $(this).val();
                 }).get(),
-            }
+            };
 
+            // Update the hidden inputs in the previous row
             $.each(variant, function(index, value){
-                $('.updateVariantTr').prev().find('.variant_'+index).val(value)
-            })
-            
-            HT.previewVariantTr(variant)
-            HT.closeUpdateVariantBox()
-        })
+                let $input = $prevRow.find('.variant_' + index);
+                if ($input.length) {
+                    $input.val(value);
+                } else {
+                    $prevRow.find('.td-variant').append(
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'variant[' + index + '][]',
+                            class: 'variant_' + index
+                        }).val(value)
+                    );
+                }
+            });
+
+            HT.previewVariantTr(variant);
+            HT.closeUpdateVariantBox();
+        });
     }
 
     HT.previewVariantTr = (variant) => {
         let option = {
-            'quantity': variant.quantity,
-            'price': variant.price,
+            'quantity': variant.quantity || '-',
+            'price': HT.addCommas(variant.price),
             'sku': variant.sku,
         }
         $.each(option, function(index, value){
-            $('.updateVariantTr').prev().find('.td-'+index).html(value)
+            $('.updateVariantTr').prev().find('.td-'+index).text(value)
         })
-        $('.updateVariantTr').prev().find('.imageSrc').attr('src', variant.album[0])
+        if (variant.album && variant.album[0]) {
+            $('.updateVariantTr').prev().find('.imageSrc').attr('src', variant.album[0])
+        }
     }
-
-    // HT.setupSelectMultiple = (callback) => {
-    //     if($('.selectVariant').length){
-    //         let count = $('.selectVariant').length
-
-    //         $('.selectVariant').each(function(){
-    //             let _this = $(this)
-    //             let attributeCatalogueId = _this.attr('data-catid')
-    //             if(attribute != ''){
-    //                 $.get('ajax/attribute/loadAttribute', {
-    //                     attribute: attribute,
-    //                     attributeCatalogueId: attributeCatalogueId
-    //                 },function(json){
-    //                     if(json.items != 'undefined' && json.items.length){
-    //                         for(let i = 0; i < json.items.length; i++){
-    //                             var option = new Option(json.items[i].text, json.items[i].id, true, true)
-    //                             _this.append(option).trigger('change')
-    //                         }
-    //                     }
-    //                     if(--count === 0 && callback){
-    //                         callback()
-    //                     }
-    //                 });
-    //             }
-    //             HT.getSelect2(_this)
-    //         })
-    //     }
-    // }
 
     HT.setupSelectMultiple = () => {
         return new Promise((resolve) => {
@@ -628,18 +614,14 @@
         variant = JSON.parse(atob(variant))
         $('.variant-row').each(function(index, value){
             let _this = $(this)
-
-            
             let variantKey = Array.from(_this[0].classList).find(cls => cls.trim().startsWith('tr-variant-')).split('variant-')[1].trim();
-
-            // console.log(variantKey);
 
             let dataIndex = variant.sku.findIndex(sku => sku.includes(variantKey));
 
             if(dataIndex !== -1){
                 let inputHiddenFields = [
                     { name: 'variant[quantity][]', class: 'variant_quantity', value: variant.quantity[dataIndex] },
-                    { name: 'variant[sku][]', class: 'variant_sku', value:  variant.sku[dataIndex]},
+                    { name: 'variant[sku][]', class: 'variant_sku', value: variant.sku[dataIndex]},
                     { name: 'variant[price][]', class: 'variant_price', value: variant.price[dataIndex] },
                     { name: 'variant[barcode][]', class: 'variant_barcode', value: variant.barcode[dataIndex] },
                     { name: 'variant[file_name][]', class: 'variant_filename', value: variant.file_name[dataIndex] },
@@ -648,30 +630,25 @@
                 ]
     
                 for(let i = 0; i < inputHiddenFields.length; i++){
-                    _this.find('.' + inputHiddenFields[i].class).val((inputHiddenFields[i].value) ? inputHiddenFields[i].value: 0 )
+                    _this.find('.' + inputHiddenFields[i].class).val((inputHiddenFields[i].value !== undefined && inputHiddenFields[i].value !== null) ? inputHiddenFields[i].value : '')
                 }
     
                 let album = variant.album[dataIndex]
                 let variantImage = (album) ? album.split(',')[0] : 'https://daks2k3a4ib2z.cloudfront.net/6343da4ea0e69336d8375527/6343da5f04a965c89988b149_1665391198377-image16-p-500.jpg'
                 
-                
-                _this.find('.td-quantity').html(HT.addCommas(variant.quantity[dataIndex]))
-                _this.find('.td-price').html(HT.addCommas(variant.price[dataIndex]))
-                _this.find('.td-sku').html(variant.sku[dataIndex])
+                _this.find('.td-quantity').text(HT.addCommas(variant.quantity[dataIndex]) || '-')
+                _this.find('.td-price').text(HT.addCommas(variant.price[dataIndex]))
                 _this.find('.imageSrc').attr('src', variantImage)
             }
         })
     }
 
     HT.sortui2 = () => {
-        $( "#sortable2" ).sortable();
-		$( "#sortable2" ).disableSelection();
-        console.log(123)
+        $("#sortable2").sortable();
+        $("#sortable2").disableSelection();
     }
 
-
 	$(document).ready(function(){
-        
         HT.setupProductVariant()
         HT.addVariant()
         HT.niceSelect()
@@ -684,19 +661,10 @@
         HT.updateVariant()
         HT.cancleVariantUpdate()
         HT.saveVariantUpdate()
-        // HT.setupSelectMultiple(
-        //     () => {
-        //         HT.productVariant()
-        //     }
-        // )
 
         HT.setupSelectMultiple().then(() => {
             HT.productVariant();
         });
-
-        // HT.productVariant()
-        
 	});
 
 })(jQuery);
-

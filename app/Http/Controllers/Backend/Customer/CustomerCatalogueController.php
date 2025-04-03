@@ -24,6 +24,7 @@ class CustomerCatalogueController extends Controller
 
     public function index(Request $request)
     {
+        $request->merge(['publish' => 2]);
         $this->authorize('modules', 'customer.catalogue.index');
         $customerCatalogues = $this->customerCatalogueService->paginate($request);
         $config = [
@@ -60,6 +61,9 @@ class CustomerCatalogueController extends Controller
 
     public function store(StoreCustomerCatalogueRequest $request)
     {
+        $request->merge([
+            'publish' => 2
+        ]);
         if ($this->customerCatalogueService->create($request)) {
             return redirect()->route('customer.catalogue.index')->with('success', 'Thêm mới bản ghi thành công');
         }

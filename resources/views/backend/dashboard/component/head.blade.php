@@ -5,6 +5,8 @@
 <title>Hệ thống quản trị</title>
 <link rel="icon" href="/userfiles/image/mau-sac/favicon-x.png" type="image/png" sizes="30x30">
 <link href="backend/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <link href="backend/font-awesome/css/font-awesome.css" rel="stylesheet">
 <link href="backend/css/animate.css" rel="stylesheet">
 <link href="backend/plugins/jquery-ui.css" rel="stylesheet">

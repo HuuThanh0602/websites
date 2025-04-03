@@ -12,8 +12,7 @@ class Wallet extends Model
     protected $table = 'wallets'; // Tên bảng trong database
 
     protected $fillable = [
-        'user_id',
-        'balance',
+        'customer_id',
         'bank_name',
         'bank_account_number',
         'bank_account_name',

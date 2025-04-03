@@ -20,11 +20,18 @@ class AuthController extends Controller
             'password' => $request->input('password')
         ];
 
-
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Email hoặc mật khẩu không chính xác',
             ], 401);
+        }
+
+        $user = Auth::user();
+
+        if ($user->publish != 1) {
+            return response()->json([
+                'message' => 'Tài khoản của bạn chưa được kích hoạt.',
+            ], 403);
         }
 
         $user = $request->user();

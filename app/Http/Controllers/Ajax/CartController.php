@@ -18,43 +18,44 @@ class CartController extends FrontendController
     public function __construct(
         CartService $cartService,
         ProductRepository $productRepository,
-    ){
+    ) {
         $this->cartService = $cartService;
         $this->productRepository = $productRepository;
-        parent::__construct(); 
+        parent::__construct();
     }
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
+
         $flag = $this->cartService->create($request, $this->language);
 
         $cart = Cart::instance('shopping')->content();
-        
+
         return response()->json([
-            'cart' => $cart, 
+            'cart' => $cart,
             'messages' => 'Thêm sản phẩm vào giỏ hàng thành công',
             'code' => ($flag) ? 10 : 11,
-        ]); 
-        
+        ]);
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $response = $this->cartService->update($request);
         return response()->json([
-            'response' => $response, 
+            'response' => $response,
             'messages' => 'Cập nhật số lượng thành công',
             'code' => (!$response) ? 11 : 10,
-        ]); 
+        ]);
     }
 
-    public function delete(Request $request){
+    public function delete(Request $request)
+    {
 
         $response = $this->cartService->delete($request);
         return response()->json([
-            'response' => $response, 
+            'response' => $response,
             'messages' => 'Xóa sản phẩm khỏi giỏ hàng thành công',
             'code' => (!$response) ? 11 : 10,
-        ]);  
+        ]);
     }
-
-   
 }

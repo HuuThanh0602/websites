@@ -105,7 +105,6 @@
             'name' => $name
         ];
     })->values());
-
     var attribute = '{{ base64_encode(json_encode(old("attribute") ?? ($product->attribute ?? []))) }}';
     var variant = '{{ base64_encode(json_encode(old("variant") ?? (isset($product->variant) ? json_decode($product->variant, true) : []))) }}';
 </script>

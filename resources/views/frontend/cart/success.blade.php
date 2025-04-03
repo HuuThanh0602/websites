@@ -33,14 +33,21 @@
                         <tbody>
                             @php
                                 $carts = $order->products;
+                          
+                                $a=0;
                             @endphp
+                            
                             @foreach($carts as $key => $val)
                             @php
+                              
                                 $name = $val->pivot->name;
                                 $qty = $val->pivot->qty;
                                 $price = convert_price($val->pivot->price, true);
                                 $priceOriginal = convert_price($val->pivot->priceOriginal, true);
                                 $subtotal = convert_price($val->pivot->price * $qty, true);
+                                $shipping=convert_price($val->shipping, true);
+                                //dd($shipping);
+                                $a=$a+$val->pivot->price * $qty;
                             @endphp
                             <tr>
                                 <td class="uk-text-left">{{ $name }}</td>
@@ -52,13 +59,16 @@
                             @endforeach
                         </tbody>
                         <tfoot>
+                            @php
+                                $a1=convert_price($a,true);
+                            @endphp
                             <tr>
                                 <td colspan="4">Mã giảm giá</td>
                                 <td><strong>{{ $order->promotion['code'] }}</strong></td>
                             </tr>
                             <tr>
                                 <td colspan="4">Tổng giá trị sản phẩm</td>
-                                <td><strong>{{ convert_price($order->cart['cartTotal'], true) }}đ</strong></td>
+                                <td><strong>{{$a1 }}đ</strong></td>
                             </tr>
                             <tr>
                                 <td colspan="4">Tổng giá trị khuyến mãi</td>
@@ -68,9 +78,10 @@
                                 <td colspan="4">Phí giao hàng</td>
                                 <td><strong>0đ</strong></td>
                             </tr>
+                            
                             <tr class="total_payment">
                                 <td colspan="4"><span>Tổng thanh toán</span></td>
-                                <td>{{ convert_price($order->cart['cartTotal'] - $order->promotion['discount'], true) }}</td>
+                                <td>{{$a }}đ</td>
                             </tr>
                         </tfoot>
                     </table>

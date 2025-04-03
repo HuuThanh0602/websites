@@ -17,7 +17,7 @@ class Product extends Model
         'album',
         'publish',
         'follow',
-        'order',
+        'allow_order',
         'user_id',
         'product_catalogue_id',
         'price',
@@ -28,7 +28,19 @@ class Product extends Model
         'variant',
         'qrcode',
         'warranty',
-        'check'
+        'check',
+        'product_brand_id',
+        'order',
+        'weight',
+        'currency',
+        'order_price',
+        'storage_fee',
+        'price_group_id',
+        'shipping',
+        'exchange_rate',
+        'discount',
+        'change_discount',
+        'sub_brand_id',
     ];
 
     protected $casts = [
@@ -37,64 +49,71 @@ class Product extends Model
 
     protected $table = 'products';
 
-    public function product_language(){
-        return $this->belongsTo(Product_language::class,'id','product_id');
+    public function product_language()
+    {
+        return $this->belongsTo(Product_language::class, 'id', 'product_id');
     }
-    public function languages(){
-        return $this->belongsToMany(Language::class, 'product_language' , 'product_id', 'language_id')
-        ->withPivot(
-            'name',
-            'canonical',
-            'meta_title',
-            'meta_keyword',
-            'meta_description',
-            'description',
-            'content',
-            'url',
-        )->withTimestamps();
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class, 'product_language', 'product_id', 'language_id')
+            ->withPivot(
+                'name',
+                'canonical',
+                'meta_title',
+                'meta_keyword',
+                'meta_description',
+                'description',
+                'content',
+                'url',
+            )->withTimestamps();
     }
-    public function product_catalogues(){
-        return $this->belongsToMany(ProductCatalogue::class, 'product_catalogue_product' , 'product_id', 'product_catalogue_id');
+    public function product_catalogues()
+    {
+        return $this->belongsToMany(ProductCatalogue::class, 'product_catalogue_product', 'product_id', 'product_catalogue_id');
     }
 
-    public function product_variants(){
+    public function product_variants()
+    {
         return $this->hasMany(ProductVariant::class, 'product_id', 'id');
     }
 
-    public function promotions(){
-        return $this->belongsToMany(Promotion::class, 'promotion_product_variant' , 'product_id', 'promotion_id')
-        ->withPivot(
-            'variant_uuid',
-            'model',
-        )->withTimestamps();
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'promotion_product_variant', 'product_id', 'promotion_id')
+            ->withPivot(
+                'variant_uuid',
+                'model',
+            )->withTimestamps();
     }
 
 
-    public function orders(){
-        return $this->belongsToMany(Order::class, 'order_product' , 'product_id', 'order_id')
-        ->withPivot(
-            'uuid',
-            'name',
-            'qty',
-            'price',
-            'priceOriginal',
-            'option',
-        );
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_product', 'product_id', 'order_id')
+            ->withPivot(
+                'uuid',
+                'name',
+                'qty',
+                'price',
+                'priceOriginal',
+                'option',
+            );
     }
 
-    public function reviews(){
+    public function reviews()
+    {
         return $this->morphMany(Review::class, 'reviewable');
     }
 
-    public function constructions(){
-        return $this->belongsToMany(Construction::class, 'construction_product' , 'construction_id', 'product_id')->withPivot(
+    public function constructions()
+    {
+        return $this->belongsToMany(Construction::class, 'construction_product', 'construction_id', 'product_id')->withPivot(
             'construction_id',
             'product_id',
             'quantity',
             'startDate',
             'endDate',
             'color',
-            'warranty',
             'status',
         );;
     }

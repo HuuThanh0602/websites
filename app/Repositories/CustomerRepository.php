@@ -59,7 +59,8 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
             'phone',
             'email',
             'address',
-            'referray_by'
+            'referray_by',
+            'description',
         )->whereIn('id', $customer_id);
         if (isset($condition['keyword']) && !empty($condition['keyword'])) {
             $keyword = $condition['keyword'];

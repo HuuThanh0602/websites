@@ -1,5 +1,5 @@
-<div class="row">
-    <div class="col-lg-3">
+<div class="row d-flex" >
+    <div class="col-lg-3 d-flex">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <span class="label label-success pull-right">Tháng</span>
@@ -8,15 +8,15 @@
             <div class="ibox-content">
                 <h1 class="no-margins">{{ $orderStatistic['orderCurrentMonth'] }}</h1>
                 {!! growHtml($orderStatistic['grow']) !!}
-                <small>Tăng trưởng so với tháng trước</small>
+                <small>So với tháng trước</small>
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3 d-flex">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <span class="label label-info pull-right">Tổng số đơn hàng</span>
-                <h5>Orders</h5>
+                <h5>Đơn hàng</h5>
             </div>
             <div class="ibox-content">
                 <h1 class="no-margins">{{ $orderStatistic['totalOrders'] }}</h1>
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3 d-flex">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <span class="label label-primary pull-right">Total</span>
@@ -37,7 +37,7 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
+    <div class="col-lg-3 d-flex">
         <div class="ibox float-e-margins">
             <div class="ibox-title">
                 <span class="label label-danger pull-right">Customer</span>

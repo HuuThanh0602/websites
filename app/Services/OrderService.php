@@ -14,103 +14,134 @@ use Illuminate\Support\Carbon;
  * Class CustomerService
  * @package App\Services
  */
-class OrderService extends BaseService implements OrderServiceInterface 
+class OrderService extends BaseService implements OrderServiceInterface
 {
     protected $orderRepository;
     protected $productVariantRepository;
     protected $productRepository;
-    
+
 
     public function __construct(
         OrderRepository $orderRepository,
         ProductVariantRepository $productVariantRepository,
         ProductRepository $productRepository,
-    ){
+    ) {
         $this->orderRepository = $orderRepository;
         $this->productVariantRepository = $productVariantRepository;
         $this->productRepository = $productRepository;
     }
 
-    
 
-    public function paginate($request){
+
+    public function paginate($request)
+    {
         $condition['keyword'] = !empty($request->input('keyword')) ? addslashes($request->input('keyword')) : '1';
         $condition['publish'] = $request->integer('publish');
-        foreach(__('cart') as $key => $val){
+        foreach (__('cart') as $key => $val) {
             $condition['dropdown'][$key] = $request->string($key);
         }
         $condition['created_at'] = $request->input('created_at');
 
-
+        $condition['by_order'] = 0;
         $perPage = $request->integer('perpage');
         $orders = $this->orderRepository->pagination(
-            $this->paginateSelect(), 
-            $condition, 
+            $this->paginateSelect(),
+            $condition,
             $perPage,
-            ['path' => 'order/index'], 
+            ['path' => 'order/index'],
+            ['id', 'desc'],
+        );
+
+        return $orders;
+    }
+    public function paginat2($request)
+    {
+        $condition['keyword'] = !empty($request->input('keyword')) ? addslashes($request->input('keyword')) : '1';
+        $condition['publish'] = $request->integer('publish');
+
+        foreach (__('cart') as $key => $val) {
+            $condition['dropdown'][$key] = $request->string($key);
+        }
+
+        $condition['created_at'] = $request->input('created_at');
+        $condition['by_order'] = 1;
+
+        $perPage = $request->integer('perpage');
+
+        $orders = $this->orderRepository->pagination(
+            $this->paginateSelect(),
+            $condition,
+            $perPage,
+            ['path' => 'order/index'],
             ['id', 'desc'],
         );
         return $orders;
     }
 
-    public function update($request){
+
+    public function update($request)
+    {
         DB::beginTransaction();
-        try{
+        try {
             $id = $request->input('id');
             $payload = $request->input('payload');
             $this->orderRepository->update($id, $payload);
-           
+
             DB::commit();
             return true;
-        }catch(\Exception $e ){
+        } catch (\Exception $e) {
             DB::rollBack();
             // Log::error($e->getMessage());
-            echo $e->getMessage();die();
+            echo $e->getMessage();
+            die();
             return false;
         }
     }
 
-    public function updatePaymentOnline($payload, $order){
+    public function updatePaymentOnline($payload, $order)
+    {
         DB::beginTransaction();
-        try{
+        try {
             $this->orderRepository->update($order->id, $payload);
-           
+
             DB::commit();
             return true;
-        }catch(\Exception $e ){
+        } catch (\Exception $e) {
             DB::rollBack();
             // Log::error($e->getMessage());
-            echo $e->getMessage();die();
+            echo $e->getMessage();
+            die();
             return false;
         }
     }
 
 
-    public function getOrderItemImage($order){
-        foreach($order->products as $key => $val){
+    public function getOrderItemImage($order)
+    {
+        foreach ($order->products as $key => $val) {
             $uuid = $val->pivot->uuid;
-            if(!is_null($uuid)){
+            if (!is_null($uuid)) {
                 $variant = $this->productVariantRepository->findByCondition([
                     ['uuid', '=', $uuid]
                 ]);
-                $variantImage = explode(',' , $variant->album)[0] ?? null;
+                $variantImage = explode(',', $variant->album)[0] ?? null;
                 $val->image = $variantImage;
             }
         }
 
         return $order;
-
     }
 
-    public function statistic(){
+    public function statistic()
+    {
         $month = now()->month;
         $year  = now()->year;
         $previousMonth = ($month == 1) ? 12 : $month - 1;
         $previousYear = ($month == 1) ? $year - 1 : $year;
 
-        
+
         $orderCurrentMonth = $this->orderRepository->getOrderByTime($month, $year);
-        $orderPreviousMonth = $this->orderRepository->getOrderByTime( $previousMonth, $previousYear);
+        $orderPreviousMonth = $this->orderRepository->getOrderByTime($previousMonth, $previousYear);
 
         return [
             'orderCurrentMonth' => $orderCurrentMonth,
@@ -121,11 +152,10 @@ class OrderService extends BaseService implements OrderServiceInterface
             'revenue' => $this->orderRepository->revenueOrders(),
             'revenueChart' => convertRevenueChartData($this->orderRepository->revenueByYear($year)),
         ];
-
-
     }
 
-    public function ajaxOrderChart($request){
+    public function ajaxOrderChart($request)
+    {
         $type = $request->input('chartType');
         switch ($type) {
             case 1:
@@ -133,8 +163,8 @@ class OrderService extends BaseService implements OrderServiceInterface
                 $response = convertRevenueChartData($this->orderRepository->revenueByYear($year));
                 break;
             case 7:
-              $response = convertRevenueChartData($this->orderRepository->revenue7Day(), 'daily_revenue', 'date', 'Ngày');
-              break;
+                $response = convertRevenueChartData($this->orderRepository->revenue7Day(), 'daily_revenue', 'date', 'Ngày');
+                break;
             case 30:
 
                 $currentMonth = now()->month;
@@ -145,27 +175,26 @@ class OrderService extends BaseService implements OrderServiceInterface
                 $temp = $this->orderRepository->revenueCurrentMonth($currentMonth, $currentYear);
                 $label = [];
                 $data = [];
-                $temp2 = array_map(function($day) use ($temp, &$label, &$data){
-                    $found = collect($temp)->first(function($record) use ($day){
+                $temp2 = array_map(function ($day) use ($temp, &$label, &$data) {
+                    $found = collect($temp)->first(function ($record) use ($day) {
                         return $record['day'] == $day;
                     });
                     $label[] = 'Ngày ' . $day;
                     $data[] = $found ? $found['daily_revenue'] : 0;
-
                 }, $allDays);
                 $response = [
                     'label' => $label,
                     'data' => $data,
                 ];
-              break;
+                break;
         }
         return $response;
-
     }
 
 
 
-    private function paginateSelect(){
+    private function paginateSelect()
+    {
         return [
             'id',
             'code',
@@ -187,8 +216,7 @@ class OrderService extends BaseService implements OrderServiceInterface
             'delivery',
             'shipping',
             'created_at',
+            'by_order'
         ];
     }
-
-
 }

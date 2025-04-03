@@ -1727,7 +1727,7 @@ ul li{
     border:1px solid #000;
     border-radius: 10px;
 }
-.cart-item .cart-item-qty .btn-qty{
+.cart-item .cart-item-qty .btn-qty {
     border:0;
     background: transparent;
     position: absolute;
@@ -1739,6 +1739,7 @@ ul li{
     width: 32px;
     height: 32px;
 }
+
 .cart-item .cart-item-qty .plus{
     right:0;
     left:initial;

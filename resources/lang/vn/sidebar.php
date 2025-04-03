@@ -52,8 +52,20 @@ return [
             'name' => ['product', 'attribute'],
             'subModule' => [
                 [
-                    'title' => 'QL Nhóm Sản Phẩm',
+                    'title' => 'QL Danh mục',
                     'route' => 'product/catalogue/index'
+                ],
+                [
+                    'title' => 'QL Thương hiệu',
+                    'route' => 'product/brand/index'
+                ],
+                [
+                    'title' => 'QL Dải giá',
+                    'route' => 'price_range/index'
+                ],
+                [
+                    'title' => 'QL Nhóm giá',
+                    'route' => 'price_group/index'
                 ],
                 [
                     'title' => 'QL Sản phẩm',
@@ -64,10 +76,10 @@ return [
                     'route' => 'attribute/catalogue/index'
                 ],
                 [
-                    'title' => 'QL thuộc tính',
+                    'title' => 'QL Thuộc tính',
                     'route' => 'attribute/index'
                 ],
-
+                
             ]
         ],
         [
@@ -79,20 +91,28 @@ return [
                     'title' => 'QL Đơn Hàng',
                     'route' => 'order/index'
                 ],
+                [
+                    'title' => 'QL Đơn Hàng Order',
+                    'route' => 'order2/index'
+                ],
             ]
         ],
         [
-            'title' => 'QL Cộng Tác Viên',
+            'title' => 'QL Khách hàng',
             'icon' => 'fa fa-user',
             'name' => ['customer'],
             'subModule' => [
                 [
-                    'title' => 'QL Loại cộng tác viên',
+                    'title' => 'QL Loại khách hàng',
                     'route' => asset('customer/catalogue/index')
                 ],
                 [
-                    'title' => 'QL Cộng tác viên',
+                    'title' => 'QL Khách hàng',
                     'route' => 'customer/index'
+                ],
+                [
+                    'title' => 'QL Cộng tác viên chờ duyệt',
+                    'route' => 'customer/wait/index'
                 ],
             ]
         ],
@@ -111,12 +131,6 @@ return [
                 ],
             ]
         ],
-        // [
-        //     'title' => 'Hệ thống phân phối',
-        //     'icon' => 'fa fa-truck',
-        //     'name' => ['distribution'],
-        //     'route' => 'distribution/index'
-        // ],
         [
             'title' => 'QL Bài viết',
             'icon' => 'fa fa-file',
@@ -144,16 +158,16 @@ return [
             ]
         ],
         [
-            'title' => 'QL Nhóm Thành Viên',
+            'title' => 'QL Nhóm Nhân viên',
             'icon' => 'fa fa-user',
             'name' => ['user', 'permission'],
             'subModule' => [
                 [
-                    'title' => 'QL Nhóm Thành Viên',
+                    'title' => 'QL phòng ban',
                     'route' => 'user/catalogue/index'
                 ],
                 [
-                    'title' => 'QL Thành Viên',
+                    'title' => 'QL Nhân viên',
                     'route' => 'user/index'
                 ],
                 [
@@ -187,15 +201,20 @@ return [
         [
             'title' => 'Cấu hình chung',
             'icon' => 'fa fa-file',
-            'name' => ['language', 'generate', 'system', 'widget'],
+            'name' => [ 'system', 'widget'],
             'subModule' => [
-                [
-                    'title' => 'QL Ngôn ngữ',
-                    'route' => 'language/index'
-                ],
+                // [
+                //     'title' => 'QL Ngôn ngữ',
+                //     'route' => 'language/index'
+                // ],
                 // [
                 //     'title' => 'QL Module',
                 //     'route' => 'generate/index'
+                // ],
+                 // [
+                //     'title' => 'QL Thương hiệu',
+                //     'name' => ['distribution'],
+                //     'route' => 'distribution/index'
                 // ],
                 [
                     'title' => 'Cấu hình hệ thống',

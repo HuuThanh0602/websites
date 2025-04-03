@@ -15,7 +15,7 @@ use App\Repositories\Interfaces\ProvinceRepositoryInterface as ProvinceRepositor
 use App\Services\CartService;
 use App\Services\WidgetService;
 
-class OrderController extends FrontendController 
+class OrderController extends FrontendController
 {
     protected $orderService;
     protected $orderRepository;
@@ -42,12 +42,36 @@ class OrderController extends FrontendController
 
     public function index(Request $request)
     {
-        $order_new = Order::where('confirm', 'pending')->where('delivery', 'pending')->count();
-        $confirmed = Order::where('confirm', 'confirm')->where('delivery', 'pending')->count();
-        $packed = Order::where('confirm', 'confirm')->where('delivery', 'pending')->count();
-        $processing = Order::where('confirm', 'confirm')->where('delivery', 'processing')->count();
-        $success = Order::where('confirm', 'confirm')->where('delivery', 'success')->count();
-        $cancel = Order::where('confirm', 'cancel')->where('delivery', 'pending')->count();
+        $order_new = Order::where('confirm', 'pending')
+            ->where('delivery', 'pending')
+            ->where('by_order', '!=', 1)
+            ->count();
+
+        $confirmed = Order::where('confirm', 'confirm')
+            ->where('delivery', 'pending')
+            ->where('by_order', '!=', 1)
+            ->count();
+
+        $packed = Order::where('confirm', 'confirm')
+            ->where('delivery', 'pending')
+            ->where('by_order', '!=', 1)
+            ->count();
+
+        $processing = Order::where('confirm', 'confirm')
+            ->where('delivery', 'processing')
+            ->where('by_order', '!=', 1)
+            ->count();
+
+        $success = Order::where('confirm', 'confirm')
+            ->where('delivery', 'success')
+            ->where('by_order', '!=', 1)
+            ->count();
+
+        $cancel = Order::where('confirm', 'cancel')
+            ->where('delivery', 'pending')
+            ->where('by_order', '!=', 1)
+            ->count();
+
         $this->authorize('modules', 'order.index');
         $orders = $this->orderService->paginate($request);
         $config = [
@@ -115,10 +139,11 @@ class OrderController extends FrontendController
             'provinces',
         ));
     }
-    public function create(){
+    public function create()
+    {
         $provinces = $this->provinceRepository->all();
         $products = Product::with('product_language')->get();
-        
+
         $config = [
             'css' => [
                 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css'
@@ -138,17 +163,15 @@ class OrderController extends FrontendController
             'provinces'
         ));
     }
-    public function store(StoreCartRequest $request){
+    public function store(StoreCartRequest $request)
+    {
         $request['method'] = 'cod';
 
         $system = $this->system;
         $order = $this->cartService->order($request, $system);
-        if($order['flag']){
-            return redirect()->back()->with('success','Đặt hàng thành công');
+        if ($order['flag']) {
+            return redirect()->back()->with('success', 'Đặt hàng thành công');
         }
-        return redirect()->back()->with('error','Đặt hàng không thành công. Hãy thử lại');
+        return redirect()->back()->with('error', 'Đặt hàng không thành công. Hãy thử lại');
     }
-
-
-    
 }

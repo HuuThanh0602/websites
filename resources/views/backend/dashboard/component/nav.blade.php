@@ -4,18 +4,18 @@
             <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
             <form role="search" class="navbar-form-custom" action="search_results.html">
                 <div class="form-group">
-                    <input type="text" placeholder="Search for something..." class="form-control" name="top-search" id="top-search">
+                    <input type="text" placeholder="Tìm kiếm" class="form-control" name="top-search" id="top-search">
                 </div>
             </form>
         </div>
         <ul class="nav navbar-top-links navbar-right">
-            <li>
-                <div class="uk-flex uk-flex-middle">
+            <!-- <li>
+                <div class="uk-flex uk-flex-middle" sty>
                     @foreach($languages as $key => $val)
-                    <a href="{{ route('language.switch', $val->id) }}" class="image img-cover language-item {{ ($val->current == 1) ? 'active' : '' }}"><img src="{{ image($val->image) }}" alt=""></a>
+                    <a href="{{ route('language.switch', $val->id) }}" class="image img-cover language-item {{ ($val->current == 1) ? 'active' : '' }}" style="background-color: white;"><img src="{{ image($val->image) }}" alt=""></a>
                     @endforeach
                 </div>
-            </li>
+            </li> -->
             <li class="dropdown">
                 <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
                     <i class="fa fa-envelope"></i> <span class="label label-warning">16</span>
@@ -115,14 +115,14 @@
 
             <li>
                 <a href="{{ route('auth.logout') }}">
-                    <i class="fa fa-sign-out"></i> Log out
+                    <i class="fa fa-sign-out"></i> Thoát
                 </a>
             </li>
-            <li>
+            <!-- <li>
                 <a class="right-sidebar-toggle">
                     <i class="fa fa-tasks"></i>
                 </a>
-            </li>
+            </li> -->
         </ul>
     </nav>
 </div>

@@ -1,7 +1,7 @@
 <style>
-    .navigation .dropdown-menu li:hover a{
-        background: blue !important;
-        color:#fff;
+    .navigation .dropdown-menu li:hover a {
+        background: #7a95a2 !important;
+        color: #fff;
     }
 </style>
 

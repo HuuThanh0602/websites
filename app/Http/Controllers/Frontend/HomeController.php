@@ -44,24 +44,33 @@ class HomeController extends FrontendController
 
     public function index()
     {
-
-
         $config = $this->config();
         $widgets = $this->widgetService->getWidget([
-            // ['keyword' => 'category', 'countObject' => true],
-            // ['keyword' => 'homepage-customer', 'children' => true],
-            // ['keyword' => 'category-highlight'],
             ['keyword' => 'product', 'children' => true, 'promotion' => TRUE, 'object' => TRUE],
             ['keyword' => 'flash-sale', 'promotion' => true],
-            // ['keyword' => 'home-intro'],
-            // ['keyword' => 'home-project', 'object' => true],
-            // ['keyword' => 'home-video', 'object' => true],
-            // ['keyword' => 'home-whyus', 'object' => true],
             ['keyword' => 'posts', 'object' => true],
         ], $this->language);
 
-        // dd($widgets);
-
+        foreach ($widgets as $key => $widget) {
+            if ($widget->keyword === 'flash-sale') {
+                $latestProductIds = \App\Models\Product::orderBy('id', 'desc')
+                    ->take(10)
+                    ->pluck('id')
+                    ->toArray();
+                $widgets[$key]->model_id = json_encode($latestProductIds);
+                if (isset($widget->object)) {
+                    $products = \App\Models\Product::whereIn('id', $latestProductIds)->orderBy('id', 'desc')->get();
+                    foreach ($products as $product) {
+                        if (!$product->languages->isEmpty()) {
+                            $product->load('languages');
+                        }
+                    }
+                    $widgets[$key]->object = $products;
+                }
+                break;
+            }
+        }
+        
         $slides = $this->slideService->getSlide([SlideEnum::BANNER, SlideEnum::MAIN, 'banner'], $this->language);
         $system = $this->system;
         $seo = [
@@ -71,6 +80,7 @@ class HomeController extends FrontendController
             'meta_image' => $this->system['seo_meta_images'],
             'canonical' => config('app.url'),
         ];
+
         return view('frontend.homepage.home.index', compact(
             'config',
             'slides',

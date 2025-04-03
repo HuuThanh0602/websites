@@ -51,7 +51,6 @@ class ProductController extends FrontendController
         }
         $product = $this->productService->combineProductAndPromotion([$id], $product, true);
 
-
         $productCatalogue = $this->productCatalogueRepository->getProductCatalogueById($product->product_catalogue_id, $this->language);
         $breadcrumb = $this->productCatalogueRepository->breadcrumb($productCatalogue, $this->language);
         /* ------------------- */
@@ -78,11 +77,6 @@ class ProductController extends FrontendController
             // ['keyword' => 'home-whyus', 'object' => true],
             // ['keyword' => 'posts', 'object' => true],
         ], $this->language);
-
-
-
-
-
         $productSeen = [
             'id' => $product->id,
             'name' => $product->name,
@@ -100,9 +94,7 @@ class ProductController extends FrontendController
         Cart::instance('seen')->add($productSeen);
 
         $cartSeen = Cart::instance('seen')->content();
-
-
-
+//dd($product);
         $config = $this->config();
         $system = $this->system;
         $seo = seo($product);

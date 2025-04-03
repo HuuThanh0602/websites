@@ -11,13 +11,22 @@ $url = ($config['method'] == 'create') ? route('customer.store') : route('custom
                 <div class="panel-head">
                     <div class="panel-title">Thông tin chung</div>
                     <div class="panel-description">
-                        <p>Nhập thông tin chung của Cộng tác viên</p>
+                        <p>Nhập thông tin chung của Khách hàng</p>
                         <p>Lưu ý: Những trường đánh dấu <span class="text-danger">(*)</span> là bắt buộc</p>
                     </div>
                 </div>
+                
             </div>
             <div class="col-lg-7">
                 <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Thông tin chung</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                        </div>
+                    </div>
                     <div class="ibox-content">
                         <div class="row mb15">
                             <div class="col-lg-5">
@@ -34,7 +43,7 @@ $url = ($config['method'] == 'create') ? route('customer.store') : route('custom
                             </div>
                             <div class="col-lg-3">
                                 <div class="form-row">
-                                    <label for="" class="control-label text-left">Mã cộng tác viên</label>
+                                    <label for="" class="control-label text-left">Mã khách hàng</label>
                                     <div class="code">
                                         <input
                                             type="text"
@@ -59,35 +68,62 @@ $url = ($config['method'] == 'create') ? route('customer.store') : route('custom
                                 </div>
                             </div>
                         </div>
+                     
                         <div class="row mb15">
-                            <div class="col-lg-6">
-                                <div class="form-row customerWrapper">
-                                    <label for="" class="control-label text-left">Loại cộng tác viên <span class="text-danger">(*)</span></label>
-                                    <select name="customer_catalogue_id" class="form-control setupSelect2">
-                                        <option value="0">[Chọn Loại CỘng Tác Viên]</option>
-                                        @foreach($customerCatalogues as $key => $item)
-                                        <option {{ 
-                                            $item->id == old('customer_catalogue_id', (isset($customer->customer_catalogue_id)) ? $customer->customer_catalogue_id : '') ? 'selected' : '' 
-                                            }} value="{{ $item->id }}">{{ $item->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <!-- <div class="col-lg-6">
-                                <div class="form-row customerWrapper">
-                                    <label for="" class="control-label text-left">Nguồn khách <span class="text-danger">(*)</span></label>
-                                    <select name="source_id" class="form-control setupSelect2">
-                                        <option value="0">[Chọn Nguồn khách]</option>
-                                        @foreach($sources as $key => $val)
-                                        <option {{ 
-                                            $val->id == old('source_id', (isset($customer->source_id)) ? $customer->source_id : '') ? 'selected' : '' 
-                                            }} value="{{ $val->id }}">{{ $val->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div> -->
-                        </div>
-                        @if($config['method'] == 'create')
+    <div class="col-lg-6">
+        <div class="form-row">
+            <label class="control-label text-left">
+                Là khách hàng mặc định 
+                <i class="fa fa-info-circle text-primary" data-toggle="tooltip" data-placement="right"
+                   title="Chọn để đánh dấu khách hàng này là mặc định (mã loại khách hàng 1)." style="background-color: white; color: red;"></i>
+            </label>
+            <div class="mt5">
+                <input type="checkbox"
+                       name="iscustomer"
+                       id="iscustomer"
+                       class="mr5"
+                       {{ old('iscustomer', isset($customer->customer_catalogue_id) && $customer->customer_catalogue_id == 1 ? 'checked' : '') }}
+                       onchange="toggleCustomerType(this)">
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-row customerWrapper" id="customerTypeSelector">
+            <label class="control-label text-left">
+                Loại cộng tác viên <span class="text-danger">(*)</span>
+                
+            </label>
+            <select name="customer_catalogue_id" id="customer_catalogue_id" class="form-control setupSelect2">
+                <option value="0">[Chọn Loại cộng tác viên phù hợp]</option>
+                @foreach($customerCatalogues as $key => $item)
+                <option {{ 
+                    $item->id == old('customer_catalogue_id', (isset($customer->customer_catalogue_id)) ? $customer->customer_catalogue_id : '') ? 'selected' : '' 
+                    }} value="{{ $item->id }}">{{ $item->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Bootstrap Tooltip Script -->
+<script>
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip(); 
+        toggleCustomerType(document.getElementById('iscustomer')); // Gọi hàm kiểm tra khi tải trang
+    });
+
+    function toggleCustomerType(checkbox) {
+        let customerTypeSelector = document.getElementById("customerTypeSelector");
+        if (checkbox.checked) {
+            customerTypeSelector.style.display = "none";
+        } else {
+            customerTypeSelector.style.display = "block";
+        }
+    }
+</script>
+           @if($config['method'] == 'create')
                         <div class="row mb15">
                             <div class="col-lg-6">
                                 <div class="form-row">
@@ -156,6 +192,14 @@ $url = ($config['method'] == 'create') ? route('customer.store') : route('custom
             </div>
             <div class="col-lg-7">
                 <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Thông tin liên hệ</h5>
+                        <div class="ibox-tools">
+                            <a class="collapse-link">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                        </div>
+                    </div>
                     <div class="ibox-content">
                         <div class="row mb15">
                             <div class="col-lg-6">
@@ -245,4 +289,29 @@ $url = ($config['method'] == 'create') ? route('customer.store') : route('custom
     district_id ') }}'
     var ward_id = '{{ (isset($customer->ward_id)) ? $customer->ward_id : old('
     ward_id ') }}'
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Run the toggle function on page load to set correct initial state
+        toggleCustomerType(document.getElementById('iscustomer'));
+    });
+
+    function toggleCustomerType(checkbox) {
+        var customerTypeSelector = document.getElementById('customerTypeSelector');
+        var customerCatalogueId = document.getElementById('customer_catalogue_id');
+        
+        if (checkbox.checked) {
+            // Hide dropdown and set value to 1 (default customer)
+            customerTypeSelector.style.display = 'none';
+            customerCatalogueId.value = '1';
+        } else {
+            // Show dropdown and allow selection of other customer types
+            customerTypeSelector.style.display = 'block';
+            
+            // If the current value is 1, reset it to 0 (prompt user to select)
+            if (customerCatalogueId.value === '1') {
+                customerCatalogueId.value = '0';
+            }
+        }
+    }
 </script>

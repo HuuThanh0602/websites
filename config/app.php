@@ -188,6 +188,7 @@ return [
         // 'Example' => App\Facades\Example::class,
         'Config' => Illuminate\Support\Facades\Config::class,
         'Cart' => Gloudemans\Shoppingcart\Facades\Cart::class,
+       
     ])->toArray(),
 
 ];

@@ -9,9 +9,10 @@
             <input type="checkbox" value="" id="checkAll" class="input-checkbox">
         </th>
         <th>{{ __('messages.tableName') }}</th>
-        @include('backend.dashboard.component.languageTh')
-        <th style="width:80px;" class="text-center">{{ __('messages.tableOrder') }}</th>
+        <!-- @include('backend.dashboard.component.languageTh') -->
+        <!-- <th style="width:80px;" class="text-center">{{ __('messages.tableOrder') }}</th> -->
         <th class="text-center" style="width:100px;">{{ __('messages.tableStatus') }}</th>
+        <th class="text-center" style="width:200px;">{{ __('Thời gian cập nhật mới nhất') }}</th>
         <th class="text-center" style="width:100px;">{{ __('messages.tableAction') }}</th>
     </tr>
     </thead>
@@ -38,12 +39,15 @@
                         </div>
                     </div>
                 </td>
-                @include('backend.dashboard.component.languageTd', ['model' => $attribute, 'modeling' => 'Attribute'])
+                <!-- @include('backend.dashboard.component.languageTd', ['model' => $attribute, 'modeling' => 'Attribute'])
                 <td>
                     <input type="text" name="order" value="{{ $attribute->order }}" class="form-control sort-order text-right" data-id="{{ $attribute->id }}" data-model="{{ $config['model'] }}">
-                </td>
+                </td> -->
                 <td class="text-center js-switch-{{ $attribute->id }}"> 
                     <input type="checkbox" value="{{ $attribute->publish }}" class="js-switch status " data-field="publish" data-model="{{ $config['model'] }}" {{ ($attribute->publish == 2) ? 'checked' : '' }} data-modelId="{{ $attribute->id }}" />
+                </td>
+                <td class="text-center">
+                    {{ !empty($attributeCatalogue->updated_at) ? \Carbon\Carbon::parse($attributeCatalogue->updated_at)->format('Y-m-d H:i:s') : 'Chưa cập nhật' }}
                 </td>
                 <td class="text-center"> 
                     <a href="{{ route('attribute.edit', [$attribute->id, $queryUrl ?? '']) }}" class="btn btn-success"><i class="fa fa-edit"></i></a>

@@ -18,6 +18,7 @@ class CustomerCatalogue extends Model
         'percent',
         'money_condition',
         'quantity_condition',
+        'duration_condition'
     ];
 
     protected $table = 'customer_catalogues';

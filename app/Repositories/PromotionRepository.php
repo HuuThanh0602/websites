@@ -16,12 +16,13 @@ class PromotionRepository extends BaseRepository implements PromotionRepositoryI
 
     public function __construct(
         Promotion $model
-    ){
+    ) {
         $this->model = $model;
     }
 
 
-    public function findByProduct(array $productId = []){
+    public function findByProduct(array $productId = [])
+    {
         return $this->model->select(
             'promotions.id as promotion_id',
             'promotions.discountValue',
@@ -30,8 +31,8 @@ class PromotionRepository extends BaseRepository implements PromotionRepositoryI
             'products.id as product_id',
             'products.price as product_price'
         )
-        ->selectRaw(
-            "
+            ->selectRaw(
+                "
                 MAX(
                     IF(promotions.maxDiscountValue != 0,
                         LEAST(
@@ -50,28 +51,29 @@ class PromotionRepository extends BaseRepository implements PromotionRepositoryI
                     )
                 ) as discount
             "
-        )
-        ->join('promotion_product_variant as ppv', 'ppv.promotion_id', '=', 'promotions.id')
-        ->join('products', 'products.id', '=', 'ppv.product_id')
-        ->where('products.publish', 2)
-        ->where('promotions.publish', 2)
-        ->whereIn('ppv.product_id', $productId)
-        ->whereDate('promotions.endDate', '>', now())
-        ->whereDate('promotions.startDate', '<', now())
-        ->groupBy('ppv.product_id')
-        ->get();
+            )
+            ->join('promotion_product_variant as ppv', 'ppv.promotion_id', '=', 'promotions.id')
+            ->join('products', 'products.id', '=', 'ppv.product_id')
+            ->where('products.publish', 2)
+            ->where('promotions.publish', 2)
+            ->whereIn('ppv.product_id', $productId)
+            ->whereDate('promotions.endDate', '>', now())
+            ->whereDate('promotions.startDate', '<', now())
+            ->groupBy('ppv.product_id')
+            ->get();
     }
 
-    public function findPromotionByVariantUuid($uuid = ''){
+    public function findPromotionByVariantUuid($uuid = '')
+    {
         return $this->model->select(
             'promotions.id as promotion_id',
             'promotions.discountValue',
             'promotions.discountType',
             'promotions.maxDiscountValue',
-            
+
         )
-        ->selectRaw(
-            "
+            ->selectRaw(
+                "
                 MAX(
                     IF(promotions.maxDiscountValue != 0,
                         LEAST(
@@ -90,30 +92,24 @@ class PromotionRepository extends BaseRepository implements PromotionRepositoryI
                     )
                 ) as discount
             "
-        )
-        ->join('promotion_product_variant as ppv', 'ppv.promotion_id', '=', 'promotions.id')
-        ->join('product_variants as pv', 'pv.uuid', '=', 'ppv.variant_uuid')
-        ->where('promotions.publish', 2)
-        ->where('ppv.variant_uuid', $uuid)
-        ->whereDate('promotions.endDate', '>', now())
-        ->whereDate('promotions.startDate', '<', now())
-        ->orderByDesc('discount') 
-        ->first();
+            )
+            ->join('promotion_product_variant as ppv', 'ppv.promotion_id', '=', 'promotions.id')
+            ->join('product_variants as pv', 'pv.uuid', '=', 'ppv.variant_uuid')
+            ->where('promotions.publish', 2)
+            ->where('ppv.variant_uuid', $uuid)
+            ->whereDate('promotions.endDate', '>', now())
+            ->whereDate('promotions.startDate', '<', now())
+            ->orderByDesc('discount')
+            ->first();
     }
 
     public function getPromotionByCartTotal()
     {
         return $this->model
-        ->where('promotions.publish', 2)
-        ->where('promotions.method', 'order_amount_range')
-        ->whereDate('promotions.endDate', '>=', now())
-        ->whereDate('promotions.startDate', '<=', now())
-        ->get();
+            ->where('promotions.publish', 2)
+            ->where('promotions.method', 'order_amount_range')
+            ->whereDate('promotions.endDate', '>=', now())
+            ->whereDate('promotions.startDate', '<=', now())
+            ->get();
     }
-    
-
-    
-
-
-    
 }

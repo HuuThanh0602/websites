@@ -24,7 +24,7 @@
     }
 
     .red {
-        background: #E74C3C;
+        background: #7995a3;
     }
 
     .blue {

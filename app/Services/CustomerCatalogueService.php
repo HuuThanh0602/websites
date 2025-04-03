@@ -113,6 +113,7 @@ class CustomerCatalogueService extends BaseService implements CustomerCatalogueS
             'percent',
             'money_condition',
             'quantity_condition',
+            'duration_condition'
         ];
     }
 }

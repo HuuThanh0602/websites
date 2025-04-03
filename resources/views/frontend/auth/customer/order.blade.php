@@ -2,22 +2,47 @@
 @section('content')
 <div class="container p-5">
     <div class="row">
-        <div class="col-12 col-md-4 col-lg-3 mx-auto">
-            <div class="list-group">
-                <a href="{{ route('customer.profile') }}" class="list-group-item list-group-item-action" aria-current="true">
-                    Tài khoản của tôi
-                </a>
-                <a href="{{ route('customer.password.change') }}" class="list-group-item list-group-item-action">Đổi mật khẩu</a>
-                <a href="{{ route('customer.wallet') }}" class="list-group-item list-group-item-action">Quản lý ví</a>
-                <a href="{{ route('customer.order') }}" class="list-group-item list-group-item-action active">Đơn hàng</a>
-                <a href="{{ route('customer.createCustomer') }}" class="list-group-item list-group-item-action">Thêm mới cộng tác viên</a>
-                <a href="{{ route('customer.logout') }}" class="list-group-item list-group-item-action">Đăng xuất</a>
-            </div>
+        <!-- Navigation Tabs Card -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-row flex-wrap border-bottom">
+                    <a href="{{ route('customer.profile') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.profile') ? 'fw-bold border-bottom border-3' : 'text-dark' }}">
+                        Tài khoản của tôi
+                    </a>
+                    <a href="{{ route('customer.password.change') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.password.change') ? 'fw-bold border-bottom border-3' : 'text-dark' }}">
+                        Đổi mật khẩu
+                    </a>
+                    @if(auth()->guard('customer')->check())
+                    @php
+                    $customer = auth()->guard('customer')->user();
+                    @endphp
 
+
+                    @if($customer->customer_catalogue_id == 1 || $customer->customer_catalogue_id == 2)
+                    <a href="{{ route('customer.registerCustomer') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.registerCustomer') ? 'fw-bold border-bottom border-3' : 'text-dark' }}">
+                        Đăng ký cộng tác viên
+                    </a>
+                    @else
+                    <a href="{{ route('customer.wallet') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.wallet') ? 'fw-bold border-bottom border-3' : 'text-dark' }}">
+                        Quản lý ví
+                    </a>
+                    <a href="{{ route('customer.createCustomer') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.createCustomer') ? 'fw-bold border-bottom border-3' : 'text-dark' }}" style="color:#7A95A2;">
+                        Giới thiệu cộng tác viên
+                    </a>
+                    @endif
+                    @endif
+                    <a href="{{ route('customer.order') }}" class="btn btn-link text-decoration-none px-3 py-2 {{ request()->routeIs('customer.order') ? 'fw-bold border-bottom border-3' : 'text-dark' }}" style="color: #7995a3; font-weight: 500;">
+                        Đơn hàng
+                    </a>
+                    <a href="{{ route('customer.logout') }}" class="btn btn-link text-decoration-none px-3 py-2 text-danger">
+                        Đăng xuất
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="col-12 col-md-8 col-lg-9 mx-auto">
+        <div class="container">
             @include('backend/dashboard/component/formError')
-            <h4 class="text-center mb-3">Đơn hàng của tôi</h4>
+            <h5 class="text-center mb-3">Đơn hàng của tôi</h5>
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -107,13 +132,15 @@
     </div>
 </div>
 
+
 @endsection
+
 
 @section('css')
 <style>
     .btn-main {
         height: 33px;
-        background: #da2229;
+        background: #7995a3;
         text-transform: uppercase;
         color: #fff;
         font-weight: 600;

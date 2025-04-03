@@ -14,34 +14,39 @@ class RouterController extends FrontendController
 
     public function __construct(
         RouterRepository $routerRepository,
-    ){
+    ) {
         $this->routerRepository = $routerRepository;
-        parent::__construct(); 
+        parent::__construct();
     }
 
 
-    public function index(string $canonical = '', Request $request){
+    public function index(string $canonical = '', Request $request)
+    {
+        //dd($canonical);
+        //dd($this->router);
         $this->getRouter($canonical);
-        if(!is_null($this->router) && !empty($this->router)){
+        if (!is_null($this->router) && !empty($this->router)) {
             $method = 'index';
             echo app($this->router->controllers)->{$method}($this->router->module_id, $request);
-        }else{
+        } else {
             abort(404);
         }
     }
 
-    public function page(string $canonical = '', $page = 1, Request $request){
+    public function page(string $canonical = '', $page = 1, Request $request)
+    {
         $this->getRouter($canonical);
         $page = (!isset($page)) ? 1 : $page;
-        if(!is_null($this->router) && !empty($this->router)){
+        if (!is_null($this->router) && !empty($this->router)) {
             $method = 'index';
             echo app($this->router->controllers)->{$method}($this->router->module_id, $request, $page);
-        }else{
+        } else {
             abort(404);
         }
     }
 
-    public function getRouter($canonical){
+    public function getRouter($canonical)
+    {
         $this->router = $this->routerRepository->findByCondition(
             [
                 ['canonical', '=', $canonical],
@@ -49,7 +54,4 @@ class RouterController extends FrontendController
             ]
         );
     }
-  
-
-
 }

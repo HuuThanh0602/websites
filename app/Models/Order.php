@@ -30,6 +30,7 @@ class Order extends Model
         'payment',
         'delivery',
         'shipping',
+        'by_order'
     ];
 
     protected $casts = [

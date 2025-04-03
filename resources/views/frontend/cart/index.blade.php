@@ -1,7 +1,7 @@
 @extends('frontend.homepage.layout')
 @section('content')
 <div class="cart-container">
-    <div class="page-breadcrumb background">      
+    <div class="page-breadcrumb background">
         <div class="uk-container uk-container-center">
             <ul class="uk-list uk-clearfix">
                 <li><a href="/"><i class="fi-rs-home mr5"></i>Trang chủ</a></li>
@@ -10,17 +10,17 @@
         </div>
     </div>
     <div class="uk-container uk-container-center">
-
         @if ($errors->any())
         <div class="uk-alert uk-alert-danger" style="margin-top: 20px">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
+            <ul>
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
         @endif
         <form action="{{ route('cart.store') }}" class="uk-form form" method="post">
+            <input type="text" name="type" hidden value="{{$type}}">
             @csrf
             <h2 class="heading-1"><span>Thông tin đặt hàng</span></h2>
             <div class="cart-wrapper">
@@ -36,14 +36,21 @@
                             <div class="panel-head">
                                 <h2 class="cart-heading"><span>Đơn hàng</span></h2>
                             </div>
+                            @if($type==2||$type==3)
+                            @include('frontend.cart.component.item2')
+
+                            @else
                             @include('frontend.cart.component.item')
+
+                            @endif
                             @include('frontend.cart.component.voucher')
                             @include('frontend.cart.component.summary')
+
                             <button type="submit" class="cart-checkout" value="create" name="create">Thanh toán đơn hàng</button>
                             <div class="box-info mt-3">
                                 <div class="box-title">Thông tin bổ sung</div>
                                 <div class="info">
-                                    <div class="content-style">
+                                    <div class="content-style"> 
                                         <h3><strong>Chính sách trả hàng, đổi hàng:</strong></h3>
                                         <p>Ngoại trừ lỗi do nhà sản xuất hoặc khác mẫu yêu cầu, những trường hợp còn lại Quý khách không được đổi-trả hàng.</p>
                                     </div>
@@ -58,7 +65,10 @@
 </div>
 @endsection
 <script>
-    var province_id = '{{ (isset($order->province_id)) ? $order->province_id : old('province_id') }}'
-    var district_id = '{{ (isset($order->district_id)) ? $order->district_id : old('district_id') }}'
-    var ward_id = '{{ (isset($order->ward_id)) ? $order->ward_id : old('ward_id') }}'
+    var province_id = '{{ (isset($order->province_id)) ? $order->province_id : old('
+    province_id ') }}'
+    var district_id = '{{ (isset($order->district_id)) ? $order->district_id : old('
+    district_id ') }}'
+    var ward_id = '{{ (isset($order->ward_id)) ? $order->ward_id : old('
+    ward_id ') }}'
 </script>

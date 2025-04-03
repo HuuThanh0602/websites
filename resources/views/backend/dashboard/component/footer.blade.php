@@ -1,8 +1,5 @@
 <div class="footer">
-    <div class="pull-right">
-        10GB of <strong>250GB</strong> Free.
-    </div>
-    <div>
-        <strong>Copyright</strong> Example Company &copy; 2014-2017
-    </div>
+<div class="login-footer" style="text-align: center;">
+                    Copyright nhóm 2 - HVNH | <small>© 2025</small>
+                </div>
 </div>

@@ -37,8 +37,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
         );
         return $customers;
     }
-
-
+    
     public function create($request)
     {
         DB::beginTransaction();
@@ -50,7 +49,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             $payload['password'] = Hash::make($payload['password']);
             $customer = $this->customerRepository->create($payload);
             DB::commit();
-            return true;
+            return $customer;
         } catch (\Exception $e) {
             DB::rollBack();
             echo $e->getMessage();
@@ -123,9 +122,11 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             'phone',
             'address',
             'name',
+            'birthday',
             'publish',
             'customer_catalogue_id',
             'source_id',
+            'description'
         ];
     }
 }

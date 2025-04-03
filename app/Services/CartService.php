@@ -117,73 +117,83 @@ class CartService  implements CartServiceInterface
     }
     private function createOrderProduct($payload, $order, $request)
     {
-        $carts = Cart::instance('shopping')->content();
-        $carts = $this->remakeCart($carts);
-        $temp = [];
+        //dd($request);
+        if($request->carts==null){
+            $carts = Cart::instance('shopping')->content();
+            $carts = $this->remakeCart($carts);
+            // dd($carts);
+        }
+        else{
+            //dd($request->carts);
+            $carts=$request->carts;
+        }
         
+        //dd($carts);
+        $temp = [];
+
         if (!empty($carts)) {
+
             foreach ($carts as $key => $val) {
                 $extract = explode('_', $val->id);
                 $productId = $extract[0] ?? null;
-    
+
                 if (!$productId || !is_numeric($productId)) {
-                    continue; 
+                    continue;
                 }
-    
+
                 $temp[] = [
                     'product_id' => $productId,
                     'uuid' => $extract[1] ?? null,
                     'name' => $val->name,
                     'qty' => $val->qty,
                     'price' => $val->price,
-                    'user_id' => 1,
                     'priceOriginal' => $val->priceOriginal ?? $val->price,
                     'option' => json_encode($val->options),
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ];
             }
         }
+
+        //dd($temp);
         if (!empty($temp)) {
-            $order->products()->createMany($temp); 
+            $order->products()->sync($temp);
         }
-        Product::orderBy('id', 'desc')->first()?->delete();
+        // Product::orderBy('id', 'desc')->first()?->delete();
     }
 
     public function order($request, $system)
     {
         $productIds = $request->input('products', []);
         $quantities = $request->input('quantities', []);
-        
+
         $carts = [];
-        $totalPrice = 0; 
-        
+        $totalPrice = 0;
+
         foreach ($productIds as $key => $productId) {
             $productLang = DB::table('product_language')
                 ->where('product_id', $productId)
                 ->where('language_id', 1)
                 ->value('name');
-        
+
             $product = DB::table('products')->where('id', $productId)->first();
-        
+
             if ($product) {
-                $subtotal = $product->price * ($quantities[$key] ?? 1); 
-        
+                $subtotal = $product->price * ($quantities[$key] ?? 1);
+
                 $carts[] = [
                     'product_id' => $productId,
-                    'name' => $productLang ?? $product->name, 
+                    'name' => $productLang ?? $product->name,
                     'qty' => $quantities[$key] ?? 1,
                     'price' => $product->price,
                     'subtotal' => $subtotal,
                 ];
-        
-                $totalPrice += $subtotal; 
+
+                $totalPrice += $subtotal;
             }
         }
         $result = [
             'carts' => $carts,
             'total_price' => $totalPrice
-        ];        
+        ];
         DB::beginTransaction();
         try {
             $payload = $this->request($request);
@@ -191,13 +201,12 @@ class CartService  implements CartServiceInterface
             if ($order->id > 0) {
 
                 $this->createOrderProduct($payload, $order, $request);
-               
-                $this->mail($order, $system,$result);
-                
+
+                $this->mail($order, $system, $result);
+
                 Cart::instance('shopping')->destroy();
-                
             }
-           
+
             DB::commit();
             return [
                 'order' => $order,
@@ -214,7 +223,7 @@ class CartService  implements CartServiceInterface
         }
     }
 
-    private function mail($order, $sytem,$result)
+    private function mail($order, $sytem, $result)
     {
         $to = $order->email;
         $cc = $sytem['contact_email'];
@@ -231,8 +240,8 @@ class CartService  implements CartServiceInterface
         \Mail::to($to)->cc($cc)->send(new OrderMail($data));
     }
 
-    
-    
+
+
 
     private function request($request)
     {

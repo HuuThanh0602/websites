@@ -7,7 +7,7 @@
             <th>Họ Tên</th>
             <th>Email</th>
             <th>Số điện thoại</th>
-            <th>Địa chỉ</th>
+            <th>Mô tả</th>
             <th class="text-center">Loại cộng tác viên</th>
             <!-- <th class="text-center">Nguồn</th> -->
             <th class="text-center">Tình Trạng</th>
@@ -31,16 +31,24 @@
                 {{ $customer->phone }}
             </td>
             <td>
-                {{ $customer->address }}
+                {{ $customer->description }}
             </td>
             <td class="text-center">
-                {{ $customer->customer_catalogues->name }}
-                <!-- </td>
-            <td class="text-center">
-                {{ $customer->sources->name }}
-            </td> -->
+            <form action="{{ route('customer.update1', $customer->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <select name="customer_catalogue_id" class="form-control" onchange="this.form.submit()">
+                    @foreach($customerCatalogues as $customerCatalogue)
+                        <option value="{{ $customerCatalogue->id }}" 
+                            {{ $customer->customer_catalogue_id == $customerCatalogue->id ? 'selected' : '' }}>
+                            {{ $customerCatalogue->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+            </td>
             <td class="text-center js-switch-{{ $customer->id }}">
-                <input type="checkbox" value="{{ $customer->publish }}" class="js-switch status " data-field="publish" data-model="{{ $config['model'] }}" {{ ($customer->publish == 2) ? 'checked' : '' }} data-modelId="{{ $customer->id }}" />
+                <input type="checkbox" value="{{ $customer->publish }}" class="js-switch status " data-field="publish" data-model="{{ $config['model'] }}" {{ ($customer->publish == 2 || $customer->publish == 3) ? 'checked' : '' }} data-modelId="{{ $customer->id }}" />
             </td>
             <td class="text-center">
                 <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-success"><i class="fa fa-edit"></i></a>

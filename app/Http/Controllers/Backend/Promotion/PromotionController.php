@@ -29,12 +29,12 @@ class PromotionController extends Controller
         PromotionRepository $promotionRepository,
         LanguageRepository $languageRepository,
         SourceRepository $sourceRepository,
-    ){
+    ) {
         $this->promotionService = $promotionService;
         $this->promotionRepository = $promotionRepository;
         $this->languageRepository = $languageRepository;
         $this->sourceRepository = $sourceRepository;
-        $this->middleware(function($request, $next){
+        $this->middleware(function ($request, $next) {
             $locale = app()->getLocale(); // vn en cn
             $language = Language::where('canonical', $locale)->first();
             $this->language = $language->id;
@@ -42,10 +42,11 @@ class PromotionController extends Controller
         });
     }
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $this->authorize('modules', 'promotion.index');
         $promotions = $this->promotionService->paginate($request);
-      
+        //dd($promotions);
         $config = [
             'js' => [
                 'backend/js/plugins/switchery/switchery.js',
@@ -66,7 +67,8 @@ class PromotionController extends Controller
         ));
     }
 
-    public function create(){
+    public function create()
+    {
         $this->authorize('modules', 'promotion.create');
         $sources = $this->sourceRepository->all();
         $config = $this->config();
@@ -80,16 +82,18 @@ class PromotionController extends Controller
         ));
     }
 
-    public function store(StorePromotionRequest $request){
-        if($this->promotionService->create($request, $this->language)){
-            return redirect()->route('promotion.index')->with('success','Thêm mới bản ghi thành công');
+    public function store(StorePromotionRequest $request)
+    {
+        if ($this->promotionService->create($request, $this->language)) {
+            return redirect()->route('promotion.index')->with('success', 'Thêm mới bản ghi thành công');
         }
-        return redirect()->route('promotion.index')->with('error','Thêm mới bản ghi không thành công. Hãy thử lại');
+        return redirect()->route('promotion.index')->with('error', 'Thêm mới bản ghi không thành công. Hãy thử lại');
     }
 
-    
 
-    public function edit($id){
+
+    public function edit($id)
+    {
         $this->authorize('modules', 'promotion.update');
         $promotion = $this->promotionRepository->findById($id);
         $sources = $this->sourceRepository->all();
@@ -106,14 +110,16 @@ class PromotionController extends Controller
         ));
     }
 
-    public function update($id, UpdatePromotionRequest $request){
-        if($this->promotionService->update($id, $request, $this->language)){
-            return redirect()->route('promotion.index')->with('success','Cập nhật bản ghi thành công');
+    public function update($id, UpdatePromotionRequest $request)
+    {
+        if ($this->promotionService->update($id, $request, $this->language)) {
+            return redirect()->route('promotion.index')->with('success', 'Cập nhật bản ghi thành công');
         }
-        return redirect()->route('promotion.index')->with('error','Cập nhật bản ghi không thành công. Hãy thử lại');
+        return redirect()->route('promotion.index')->with('error', 'Cập nhật bản ghi không thành công. Hãy thử lại');
     }
 
-    public function delete($id){
+    public function delete($id)
+    {
         $this->authorize('modules', 'promotion.destroy');
         $config['seo'] = __('messages.promotion');
         $promotion = $this->promotionRepository->findById($id);
@@ -125,14 +131,16 @@ class PromotionController extends Controller
         ));
     }
 
-    public function destroy($id){
-        if($this->promotionService->destroy($id)){
-            return redirect()->route('promotion.index')->with('success','Xóa bản ghi thành công');
+    public function destroy($id)
+    {
+        if ($this->promotionService->destroy($id)) {
+            return redirect()->route('promotion.index')->with('success', 'Xóa bản ghi thành công');
         }
-        return redirect()->route('promotion.index')->with('error','Xóa bản ghi không thành công. Hãy thử lại');
+        return redirect()->route('promotion.index')->with('error', 'Xóa bản ghi không thành công. Hãy thử lại');
     }
 
-    public function translate($languageId, $promotionId){
+    public function translate($languageId, $promotionId)
+    {
         $this->authorize('modules', 'promotion.translate');
         $promotion = $this->promotionRepository->findById($promotionId);
         $promotion->jsonDescription = $promotion->description;
@@ -156,14 +164,16 @@ class PromotionController extends Controller
         ));
     }
 
-    public function saveTranslate(Request $request){
-        if($this->promotionService->saveTranslate($request, $this->language)){
-            return redirect()->route('promotion.index')->with('success','Tạo bản dịch thành công');
+    public function saveTranslate(Request $request)
+    {
+        if ($this->promotionService->saveTranslate($request, $this->language)) {
+            return redirect()->route('promotion.index')->with('success', 'Tạo bản dịch thành công');
         }
-        return redirect()->route('promotion.index')->with('error','Tạo bản dịch không thành công. Hãy thử lại');
+        return redirect()->route('promotion.index')->with('error', 'Tạo bản dịch không thành công. Hãy thử lại');
     }
 
-    private function config(){
+    private function config()
+    {
         return [
             'css' => [
                 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
@@ -178,5 +188,4 @@ class PromotionController extends Controller
             ]
         ];
     }
-
 }

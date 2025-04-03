@@ -22,6 +22,11 @@ use App\Http\Controllers\Backend\SlideController;
 use App\Http\Controllers\Backend\WidgetController;
 use App\Http\Controllers\Backend\ReportController;
 use App\Http\Controllers\Backend\OrderController;
+use App\Http\Controllers\Backend\Order2Controllder;
+
+
+use App\Http\Controllers\Backend\BrandController;
+
 use App\Http\Controllers\Backend\Promotion\PromotionController;
 use App\Http\Controllers\Backend\ReviewController;
 use App\Http\Controllers\Ajax\LocationController;
@@ -39,6 +44,11 @@ use App\Http\Controllers\Backend\Product\ProductCatalogueController;
 use App\Http\Controllers\Backend\Product\ProductController;
 use App\Http\Controllers\Backend\Attribute\AttributeCatalogueController;
 use App\Http\Controllers\Backend\Attribute\AttributeController;
+
+
+use App\Http\Controllers\Backend\Price\PriceGroupController;
+use App\Http\Controllers\Backend\Price\PriceRangeController;
+
 use App\Http\Controllers\Backend\SystemController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\RouterController;
@@ -75,7 +85,7 @@ use App\Http\Controllers\Frontend\MyOrder\MyOrderController;
 |
 */
 
-Route::group(['middleware' => 'license'], function () {
+Route::group(['middleware'], function () {
    /* FRONTEND ROUTES  */
    Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
@@ -100,8 +110,12 @@ Route::group(['middleware' => 'license'], function () {
    Route::get('customer/password/forgot' . config('apps.general.suffix'), [FeAuthController::class, 'forgotCustomerPassword'])->name('forgot.customer.password');
    Route::get('customer/password/email' . config('apps.general.suffix'), [FeAuthController::class, 'verifyCustomerEmail'])->name('customer.password.email');
    Route::get('customer/register' . config('apps.general.suffix'), [FeAuthController::class, 'register'])->name('customer.register');
+
    Route::post('customer/reg' . config('apps.general.suffix'), [FeAuthController::class, 'registerAccount'])->name('customer.reg');
 
+   Route::post('collaborator/reg' . config('apps.general.suffix'), [FeAuthController::class, 'registerCollab'])->name('collaborator.reg');
+
+   Route::get('collaborator/register' . config('apps.general.suffix'), [FeAuthController::class, 'registerCollaborator'])->name('collaborator.register');
 
    Route::get('customer/password/update' . config('apps.general.suffix'), [FeAuthController::class, 'updatePassword'])->name('customer.update.password');
    Route::post('customer/password/change' . config('apps.general.suffix'), [FeAuthController::class, 'changePassword'])->name('customer.password.reset');
@@ -111,7 +125,15 @@ Route::group(['middleware' => 'license'], function () {
 
       Route::get('customer/order' . config('apps.general.suffix'), [FeCustomerController::class, 'order'])->name('customer.order');
       Route::get('customer/wallet' . config('apps.general.suffix'), [FeCustomerController::class, 'wallet'])->name('customer.wallet');
-      Route::get('customer/create' . config('apps.general.suffix'), [FeCustomerController::class, 'createCustomer'])->name('customer.createCustomer');
+
+      Route::get('customer/register-custumer' . config('apps.general.suffix'), [FeCustomerController::class, 'registerCustomer'])->name('customer.registerCustomer');
+
+      Route::post('customer/register-custumer' . config('apps.general.suffix'), [FeCustomerController::class, 'registerCustomer2'])->name('customer.registerCustomer2');
+
+
+      Route::get('customer/create' . config('apps.general.suffix'), [FeCustomerController::class, 'createCustomer'])->name('customer.customer123');
+      Route::get('customer/customer' . config('apps.general.suffix'), [FeCustomerController::class, 'customer'])->name('customer.createCustomer');
+
       Route::post('/wallet/store' . config('apps.general.suffix'), [FeCustomerController::class, 'store'])->name('customer.store123');
 
       Route::post('/wallet/update-bank' . config('apps.general.suffix'), [FeCustomerController::class, 'updateBankAccount'])->name('wallet.updateBank');
@@ -128,6 +150,34 @@ Route::group(['middleware' => 'license'], function () {
       Route::get('customer/warranty/check' . config('apps.general.suffix'), [FeCustomerController::class, 'warranty'])->name('customer.check.warranty');
       Route::post('customer/warranty/active', [FeCustomerController::class, 'active'])->name('customer.active.warranty');
    });
+
+
+   Route::get('he-thong-phan-phoi' . config('apps.general.suffix'), [FeDistributionController::class, 'index'])->name('distribution.list.index');
+   Route::get('danh-sach-yeu-thich' . config('apps.general.suffix'), [FeProductCatalogueController::class, 'wishlist'])->name('product.catalogue.wishlist');
+   Route::get('thanh-toan' . config('apps.general.suffix'), [CartController::class, 'checkout'])->name('cart.checkout');
+
+   Route::get('thanh-toan/{type}', [CartController::class, 'cart'])->name('cart.checkout2');
+
+   Route::get('thanh-toan/checkout/{type}' . config('apps.general.suffix'), [CartController::class, 'checkout'])->name('cart.checkout3');
+
+   Route::get('{canonical}' . config('apps.general.suffix'), [RouterController::class, 'index'])->name('router.index')->where('canonical', '[a-zA-Z0-9-]+');
+   Route::get('{canonical}/trang-{page}' . config('apps.general.suffix'), [RouterController::class, 'page'])->name('router.page')->where('canonical', '[a-zA-Z0-9-]+')->where('page', '[0-9]+');
+   Route::post('cart/create', [CartController::class, 'store'])->name('cart.store');
+
+   Route::post('/cart/update-attribute', [CartController::class, 'updateAttribute'])->name('cart.updateAttribute');
+
+
+   Route::post('cart/update', [CartController::class, 'update'])->name('cart.update');
+   Route::post('cart/update', [CartController::class, 'update2'])->name('cart.update_1');
+
+   Route::post('cart/romve', [CartController::class, 'remove'])->name('cart.remove');
+
+
+   Route::get('cart/{code}/success' . config('apps.general.suffix'), [CartController::class, 'success'])->name('cart.success')->where(['code' => '[0-9]+']);
+
+   Route::post('cart/create-cart2', [CartController::class, 'storeCart'])->name('cart.storeCart2');
+
+   Route::post('cart/create-cart', [CartController::class, 'storeCartOrder'])->name('cart.storeCartOrder');
 
 
 
@@ -165,13 +215,6 @@ Route::group(['middleware' => 'license'], function () {
 
 
 
-   Route::get('he-thong-phan-phoi' . config('apps.general.suffix'), [FeDistributionController::class, 'index'])->name('distribution.list.index');
-   Route::get('danh-sach-yeu-thich' . config('apps.general.suffix'), [FeProductCatalogueController::class, 'wishlist'])->name('product.catalogue.wishlist');
-   Route::get('thanh-toan' . config('apps.general.suffix'), [CartController::class, 'checkout'])->name('cart.checkout');
-   Route::get('{canonical}' . config('apps.general.suffix'), [RouterController::class, 'index'])->name('router.index')->where('canonical', '[a-zA-Z0-9-]+');
-   Route::get('{canonical}/trang-{page}' . config('apps.general.suffix'), [RouterController::class, 'page'])->name('router.page')->where('canonical', '[a-zA-Z0-9-]+')->where('page', '[0-9]+');
-   Route::post('cart/create', [CartController::class, 'store'])->name('cart.store');
-   Route::get('cart/{code}/success' . config('apps.general.suffix'), [CartController::class, 'success'])->name('cart.success')->where(['code' => '[0-9]+']);
 
    /* FRONTEND SYSTEM */
 
@@ -196,12 +239,12 @@ Route::group(['middleware' => 'license'], function () {
    Route::post('ajax/review/create', [AjaxReviewController::class, 'create'])->name('ajax.review.create');
    Route::get('ajax/product/loadVariant', [AjaxProductController::class, 'loadVariant'])->name('ajax.loadVariant');
    Route::get('ajax/product/filter', [AjaxProductController::class, 'filter'])->name('ajax.filter');
-   Route::post('ajax/cart/create', [AjaxCartController::class, 'create'])->name('ajax.cart.create');
-   Route::post('ajax/cart/update', [AjaxCartController::class, 'update'])->name('ajax.cart.update');
-   Route::post('ajax/cart/delete', [AjaxCartController::class, 'delete'])->name('ajax.cart.delete');
    Route::get('ajax/location/getLocation', [LocationController::class, 'getLocation'])->name('ajax.location.index');
    Route::post('updatePermission', [CustomerCatalogueController::class, 'updatePermission'])->name('customer.catalogue.updatePermission');
 
+   Route::post('ajax/cart/create', [AjaxCartController::class, 'create'])->name('ajax.cart.create');
+   Route::post('ajax/cart/update', [AjaxCartController::class, 'update'])->name('ajax.cart.update');
+   Route::post('ajax/cart/delete', [AjaxCartController::class, 'delete'])->name('ajax.cart.delete');
 
    Route::get('ajax/dashboard/findModelObject', [AjaxDashboardController::class, 'findModelObject'])->name('ajax.dashboard.findModelObject');
    /* BACKEND ROUTES */
@@ -235,11 +278,18 @@ Route::group(['middleware' => 'license'], function () {
       });
 
       Route::group(['prefix' => 'customer'], function () {
+         Route::get('wait/index', [CustomerController::class, 'indexWait'])->name('customer.wait.index');
          Route::get('index', [CustomerController::class, 'index'])->name('customer.index');
          Route::get('create', [CustomerController::class, 'create'])->name('customer.create');
          Route::post('store', [CustomerController::class, 'store'])->name('customer.store');
          Route::get('{id}/edit', [CustomerController::class, 'edit'])->where(['id' => '[0-9]+'])->name('customer.edit');
          Route::post('{id}/update', [CustomerController::class, 'update'])->where(['id' => '[0-9]+'])->name('customer.update');
+
+         Route::put('{id}/update1', [CustomerController::class, 'update1'])->where(['id' => '[0-9]+'])->name('customer.update1');
+         Route::get('{id}/accept', [CustomerController::class, 'accept'])->name('customer.accept');
+         Route::get('{id}/reject', [CustomerController::class, 'reject'])->name('customer.reject');
+
+
          Route::get('{id}/delete', [CustomerController::class, 'delete'])->where(['id' => '[0-9]+'])->name('customer.delete');
          Route::delete('{id}/destroy', [CustomerController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('customer.destroy');
       });
@@ -410,6 +460,19 @@ Route::group(['middleware' => 'license'], function () {
          Route::get('{id}/delete', [ProductController::class, 'delete'])->where(['id' => '[0-9]+'])->name('product.delete');
          Route::delete('{id}/destroy', [ProductController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('product.destroy');
       });
+
+      Route::group(['prefix' => 'product/brand'], function () {
+         Route::get('index', [BrandController::class, 'index'])->name('brand.index');
+         Route::get('create', [BrandController::class, 'create'])->name('brand.create');
+         Route::post('store', [BrandController::class, 'store'])->name('brand.store');
+         Route::get('{id}/edit', [BrandController::class, 'edit'])->where(['id' => '[0-9]+'])->name('brand.edit');
+         Route::post('{id}/update', [BrandController::class, 'update'])->where(['id' => '[0-9]+'])->name('brand.update');
+         Route::get('{id}/delete', [BrandController::class, 'delete'])->where(['id' => '[0-9]+'])->name('brand.delete');
+         Route::post('/update-status', [BrandController::class, 'updateStatus'])->name('update.status');
+
+         Route::delete('{id}/destroy', [BrandController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('brand.destroy');
+      });
+
       Route::group(['prefix' => 'attribute/catalogue'], function () {
          Route::get('index', [AttributeCatalogueController::class, 'index'])->name('attribute.catalogue.index');
          Route::get('create', [AttributeCatalogueController::class, 'create'])->name('attribute.catalogue.create');
@@ -419,6 +482,31 @@ Route::group(['middleware' => 'license'], function () {
          Route::get('{id}/delete', [AttributeCatalogueController::class, 'delete'])->where(['id' => '[0-9]+'])->name('attribute.catalogue.delete');
          Route::delete('{id}/destroy', [AttributeCatalogueController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('attribute.catalogue.destroy');
       });
+
+      Route::group(['prefix' => 'price_group'], function () {
+         Route::get('index', [PriceGroupController::class, 'index'])->name('price_group.index');
+         Route::get('create', [PriceGroupController::class, 'create'])->name('price_group.create');
+         Route::post('store', [PriceGroupController::class, 'store'])->name('price_group.store');
+         Route::get('{id}/edit', [PriceGroupController::class, 'edit'])->where(['id' => '[0-9]+'])->name('price_group.edit');
+         Route::put('{id}/update', [PriceGroupController::class, 'update'])->where(['id' => '[0-9]+'])->name('price_group.update');
+         Route::delete('{id}/destroy', [PriceGroupController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('price_group.destroy');
+      });
+
+      Route::group(['prefix' => 'price_range'], function () {
+
+         Route::get('index', [PriceRangeController::class, 'index'])->name('price_range.index');
+         Route::get('create', [PriceRangeController::class, 'create'])->name('price_range.create');
+         Route::post('store', [PriceRangeController::class, 'store'])->name('price_range.store');
+         Route::get('{id}/edit', [PriceRangeController::class, 'edit'])->where(['id' => '[0-9]+'])->name('price_range.edit');
+
+         Route::get('{sub_name}/edit2', [PriceRangeController::class, 'edi_sub_price_range'])->where(['id' => '[0-9]+'])->name('sub_price_range.edit');
+
+         Route::put('{id}/update', [PriceRangeController::class, 'update'])->where(['id' => '[0-9]+'])->name('price_range.update');
+         Route::put('{id}/update', [PriceRangeController::class, 'update2'])->where(['id' => '[0-9]+'])->name('price_range.update2');
+
+         Route::delete('{id}/destroy', [PriceRangeController::class, 'destroy'])->where(['id' => '[0-9]+'])->name('price_range.destroy');
+      });
+
 
       Route::group(['prefix' => 'attribute'], function () {
          Route::get('index', [AttributeController::class, 'index'])->name('attribute.index');
@@ -436,8 +524,14 @@ Route::group(['middleware' => 'license'], function () {
          Route::put('update-order-status/{code}', [OrderController::class, 'updateStatus'])->name('update-order-status');
          Route::get('create', [OrderController::class, 'create'])->name('customer.order.create');
          Route::post('store', [OrderController::class, 'store'])->name('customer.order.store');
+      });
 
-
+      Route::group(['prefix' => 'order2'], function () {
+         Route::get('index', [Order2Controllder::class, 'index'])->name('order2.index');
+         Route::get('{id}/detail', [Order2Controllder::class, 'detail'])->where(['id' => '[0-9]+'])->name('order2.detail');
+         Route::put('update-order-status/{code}', [Order2Controllder::class, 'updateStatus'])->name('update-order2-status');
+         Route::get('create', [Order2Controllder::class, 'create'])->name('customer.order2.create');
+         Route::post('store', [Order2Controllder::class, 'store'])->name('customer.order2.store');
       });
 
       /*CRM*/
@@ -495,7 +589,16 @@ Route::group(['middleware' => 'license'], function () {
       Route::post('ajax/product/deleteProduct', [AjaxConstructController::class, 'deleteProduct'])->name('ajax.product.deleteProduct');
       Route::get('ajax/dashboard/findInformationObject', [AjaxDashboardController::class, 'findInformationObject'])->name('ajax.findInformationObject');
    });
+   // Route cho admin dashboard
    Route::get('admin', [AuthController::class, 'index'])->name('auth.admin')->middleware('login');
+
+   // Route cho chức năng quên mật khẩu
+   Route::get('/forgot-password', [App\Http\Controllers\Backend\Auth\ForgotPasswordController::class, 'showForgotPasswordForm'])->name('password.request');
+   Route::post('/forgot-password', [App\Http\Controllers\Backend\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+   Route::get('/reset-password/{token}', [App\Http\Controllers\Backend\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+   Route::post('/reset-password', [App\Http\Controllers\Backend\Auth\ResetPasswordController::class, 'resetPassword'])->name('password.update');
+
+   // Route cho đăng nhập/đăng xuất
    Route::get('logout', [AuthController::class, 'logout'])->name('auth.logout');
    Route::post('login', [AuthController::class, 'login'])->name('auth.login');
 });
@@ -504,3 +607,5 @@ Route::group(['middleware' => 'license'], function () {
 Route::get('/license/license', function () {
    return view('vendor.license.index');
 })->name('license');
+
+Route::put('/product/toggle-publish/{id}', [ProductController::class, 'togglePublish'])->name('product.togglePublish');

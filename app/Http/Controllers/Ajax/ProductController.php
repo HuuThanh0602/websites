@@ -10,6 +10,10 @@ use App\Repositories\Interfaces\ProductVariantRepositoryInterface  as ProductVar
 use App\Repositories\Interfaces\PromotionRepositoryInterface  as PromotionRepository;
 use App\Repositories\Interfaces\AttributeRepositoryInterface  as AttributeRepository;
 use App\Models\Language;
+use App\Models\Price_group;
+use App\Models\Price_group_deatil;
+use App\Models\Price_range;
+use App\Models\Product;
 use Cart;
 
 
@@ -28,13 +32,13 @@ class ProductController extends Controller
         PromotionRepository $promotionRepository,
         AttributeRepository $attributeRepository,
         ProductService $productService,
-    ){
+    ) {
         $this->productRepository = $productRepository;
         $this->productVariantRepository = $productVariantRepository;
         $this->promotionRepository = $promotionRepository;
         $this->attributeRepository = $attributeRepository;
         $this->productService = $productService;
-        $this->middleware(function($request, $next){
+        $this->middleware(function ($request, $next) {
             $locale = app()->getLocale(); // vn en cn
             $language = Language::where('canonical', $locale)->first();
             $this->language = $language->id;
@@ -42,21 +46,22 @@ class ProductController extends Controller
         });
     }
 
-    public function loadProductPromotion(Request $request){
+    public function loadProductPromotion(Request $request)
+    {
         $get = $request->input();
         $loadClass = loadClass($get['model']);
-        
-        
-        if($get['model'] == 'Product'){
+
+
+        if ($get['model'] == 'Product') {
             $condition = [
                 ['tb2.language_id', '=', $this->language]
             ];
-            if(isset($get['keyword']) && $get['keyword'] != ''){
-                $keywordCondition = ['tb2.name','LIKE', '%'.$get['keyword'].'%'];
+            if (isset($get['keyword']) && $get['keyword'] != '') {
+                $keywordCondition = ['tb2.name', 'LIKE', '%' . $get['keyword'] . '%'];
                 array_push($condition, $keywordCondition);
             }
             $objects = $loadClass->findProductForPromotion($condition);
-        }else if($get['model'] == 'ProductCatalogue'){
+        } else if ($get['model'] == 'ProductCatalogue') {
 
             $conditionArray['keyword'] = ($get['keyword']) ?? null;
             $conditionArray['where'] = [
@@ -65,104 +70,135 @@ class ProductController extends Controller
 
             $objects = $loadClass->pagination(
                 [
-                    'product_catalogues.id', 
-                    'tb2.name', 
-                ], 
-                $conditionArray, 
+                    'product_catalogues.id',
+                    'tb2.name',
+                ],
+                $conditionArray,
                 20,
-                ['path' => 'product.catalogue.index'],  
+                ['path' => 'product.catalogue.index'],
                 ['product_catalogues.id', 'DESC'],
                 [
-                    ['product_catalogue_language as tb2','tb2.product_catalogue_id', '=' , 'product_catalogues.id']
-                ], 
+                    ['product_catalogue_language as tb2', 'tb2.product_catalogue_id', '=', 'product_catalogues.id']
+                ],
                 []
             );
         }
-        
+
         return response()->json([
-            'model' => ($get['model']) ?? 'Product' ,
+            'model' => ($get['model']) ?? 'Product',
             'objects' => $objects,
         ]);
     }
-   
-    public function loadVariant(Request $request){
+
+    public function loadVariant(Request $request)
+    {
         $get = $request->input();
         $attributeId = $get['attribute_id'];
-        
         $attributeId = sortAttributeId($attributeId);
         
         $variant = $this->productVariantRepository->findVariant($attributeId, $get['product_id'], $get['language_id']);
 
         $variantPromotion = $this->promotionRepository->findPromotionByVariantUuid($variant->uuid);
+
         $variantPrice = getVariantPrice($variant, $variantPromotion);
+        $priceData=[];
+        if ($variant->quantity == 0) {
+            $product = Product::find($request->product_id);
+            $price_group = Price_group::where(['id' => $product->price_group_id])->first();
+        
+            $price2 = ($product->price * $price_group->exchange_rate * (1 - ($product->discount / 100))) + ($product->weight * $product->shipping);
+            $price_ranges = Price_range::where('sub_brand_id', $product->sub_brand_id)->get();
+        
+            foreach ($price_ranges as $range) {
+                if ($range->price_min <= $price2 && $price2 <= $range->price_max) {
+                    if ($range->value_type == 'fixed') {
+                        $discount_range = min(100, max(0, $range->value)); // Chặn từ 0 đến 100%
+                        $price2 *= (1 - ($discount_range / 100));
+                    } else {
+                        $price2 += $range->value;
+                    }
+                    break;
+                }
+            }
+            
+            $priceData = [
+                'price' => (float) round($price2),
+                'html' => "<div class='price-sale'>" . number_format($price2, 0, ',', '.') . "đ</div>",
+            ];
+        }
+        
+
+        //price*tỷ giá nhóm giá*(1-chiết khấu cảu nhóm giá)+khối lượng *phí vận chuyển cảu bảng nhóm giá
+        //so sánh với dải giá
+
 
         return response()->json([
-            'variant' => $variant ,
+            'variant' => $variant,
+            'priceData'=>$priceData,
             'variantPrice' => $variantPrice,
         ]);
-        
     }
-    
 
-    public function filter(Request $request){
+
+    public function filter(Request $request)
+    {
         $products = $this->productService->filter($request);
 
         $html = $this->renderFilterProduct($products);
 
         return response()->json([
-            'data' => $html ,
+            'data' => $html,
         ]);
     }
 
-    public function renderFilterProduct($products){
-
+    public function renderFilterProduct($products)
+    {
         $html = '';
-        if(!is_null($products) && count($products)){
+        if (!is_null($products) && count($products)) {
             $html .= '<div class="uk-grid uk-grid-medium">';
-                foreach($products as  $product){
-                    $name = $product->languages->first()->pivot->name;
-                    $canonical = write_url($product->languages->first()->pivot->canonical);
-                    $image = image($product->image);
-                    $price = getPrice($product);
-                    $catName = $product->product_catalogues->first()->languages->first()->pivot->name;
-                    $review = getReview($product);
-                    if(isset($product->attribute_concat)){
-                        $attributes = substr($product->attribute_concat, 0, -1);
-                    }
-                   
-                    $html .= '<div class="uk-width-large-1-4 mb20">';
-                        $html .= '<div class="product-item product">';
-                        if($price['percent'] > 0){
-                            $html .= "<div class='badge badge-bg-1'>-{$price['percent']}%</div>";
-                        }
-                        $html .= "<a href='$canonical' class='image img-scaledown img-zoomin'><img src='$image' alt='$name'></a>";
-                            $html .= '<div class="info">';
-
-
-                                // $html .= "<div class='category-title'><a href='$canonical' title='$name'>$catName</a></div>";
-                                $html .= "<h3 class='title'><a href='$canonical' title='$name'>$name</a></h3>";
-                                $html .= '<div class="rating">';
-                                    $html .= '<div class="uk-flex uk-flex-middle">';
-                                        $html .= '<div class="star-rating">';
-                                            $html .= '<div class="stars" style="--star-width: '.$review['star'].'%"></div>';
-                                        $html .= '</div>';
-                                        $html .= '<span class="rate-number">('.$review['count'].' đánh giá)</span>';
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                                $html .= '<div class="product-group">';
-                                    $html .= '<div class="uk-flex uk-flex-middle uk-flex-space-between">';
-                                        $html .= $price['html'];
-                                    $html .= '</div>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
-                    $html .= '</div>';
+            foreach ($products as  $product) {
+                $name = $product->languages->first()->pivot->name;
+                $canonical = write_url($product->languages->first()->pivot->canonical);
+                $image = image($product->image);
+                $price = getPrice($product);
+                $catName = $product->product_catalogues->first()->languages->first()->pivot->name;
+                $review = getReview($product);
+                if (isset($product->attribute_concat)) {
+                    $attributes = substr($product->attribute_concat, 0, -1);
                 }
+
+                $html .= '<div class="uk-width-large-1-4 mb20">';
+                $html .= '<div class="product-item product">';
+                if ($price['percent'] > 0) {
+                    $html .= "<div class='badge badge-bg-1'>-{$price['percent']}%</div>";
+                }
+                $html .= "<a href='$canonical' class='image img-scaledown img-zoomin'><img src='$image' alt='$name'></a>";
+                $html .= '<div class="info">';
+
+
+                // $html .= "<div class='category-title'><a href='$canonical' title='$name'>$catName</a></div>";
+                $html .= "<h3 class='title'><a href='$canonical' title='$name'>$name</a></h3>";
+                $html .= '<div class="rating">';
+                $html .= '<div class="uk-flex uk-flex-middle">';
+                $html .= '<div class="star-rating">';
+                $html .= '<div class="stars" style="--star-width: ' . $review['star'] . '%"></div>';
+                $html .= '</div>';
+                $html .= '<span class="rate-number">(' . $review['count'] . ' đánh giá)</span>';
+                $html .= '</div>';
+                $html .= '</div>';
+                $html .= '<div class="product-group">';
+                $html .= '<div class="uk-flex uk-flex-middle uk-flex-space-between">';
+                $html .= $price['html'];
+                $html .= '</div>';
+                $html .= '</div>';
+                $html .= '</div>';
+                $html .= '</div>';
+                $html .= '</div>';
+            }
             $html .= '</div>';
 
             $html .= $products->links('pagination::bootstrap-4');
-
-        }else{
+        } else {
             $html .= '<div class="no-result">Không có sản phẩm phù hợp</div>';
         }
 
@@ -170,13 +206,14 @@ class ProductController extends Controller
         return $html;
     }
 
-    public function wishlist(Request $request){
+    public function wishlist(Request $request)
+    {
         $id = $request->input('id');
         $wishlist = Cart::instance('wishlist')->content();
         $itemIndex = $wishlist->search(function ($item, $rowId) use ($id) {
             return $item->id === $id;
         });
-        
+
         $response['code'] = 0;
         $response['message'] = '';
         if ($itemIndex !== false) {
@@ -184,7 +221,6 @@ class ProductController extends Controller
 
             $response['code'] = 1;
             $response['message'] = 'Sản phẩm đã được xóa khỏi danh sách yêu thích';
-
         } else {
             Cart::instance('wishlist')->add([
                 'id' => $id,
@@ -199,5 +235,4 @@ class ProductController extends Controller
 
         return response()->json($response);
     }
-    
 }

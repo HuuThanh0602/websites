@@ -6,6 +6,7 @@ use App\Http\Controllers\FrontendController;
 use App\Services\Interfaces\CustomerServiceInterface  as CustomerService;
 use App\Services\Interfaces\AgencyServiceInterface  as AgencyService;
 use App\Http\Requests\AuthRegisterRequest;
+use App\Mail\AccountRegisteredMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -60,11 +61,38 @@ class AuthController extends FrontendController
 
     public function registerAccount(AuthRegisterRequest $request)
     {
-        if ($this->customerService->create($request)) {
-            return redirect()->route('fe.auth.login')->with('success', 'Đăng kí tài khoản thành công');
+        $existingCustomer = Customer::where('email', $request->input('email'))
+            ->orWhere('phone', $request->input('phone'))
+            ->first();
+
+            if ($existingCustomer) {
+                if ($existingCustomer->publish == 1) {
+                    $existingCustomer->update([
+                        'password' => bcrypt($request->input('password')),
+                        'publish'=>2 
+                    ]);
+                    return redirect()->route('fe.auth.login')->with('success', 'Tài khoản của bạn đã được kích hoạt. Vui lòng đăng nhập.');
+                } else {
+                    return redirect()->route('customer.register')->with('error', 'Email hoặc Số điện thoại đã được sử dụng.');
+                }
+            }
+            
+        $request->merge([
+            'customer_catalogue_id' => 1,
+            'publish' => 2
+        ]);
+
+        $customer = $this->customerService->create($request->merge($request->except(['min_orders', 'monthly_spending', 'about_me'])));
+        $password=$request->password;
+        if ($customer) {
+            Mail::to($customer->email)->send(new AccountRegisteredMail($customer,$password));
+            return redirect()->route('fe.auth.login')->with('success', 'Đăng ký tài khoản thành công. Kiểm tra email của bạn.');
         }
-        return redirect()->route('customer.register')->with('error', 'Thêm mới bản ghi không thành công. Hãy thử lại');
+
+        return redirect()->route('customer.register')->with('error', 'Thêm mới bản ghi không thành công. Hãy thử lại.');
     }
+
+
 
     public function forgotCustomerPassword()
     {
@@ -119,6 +147,7 @@ class AuthController extends FrontendController
 
     public function changePassword(Request $request)
     {
+
         $email = base64_decode(rtrim(urldecode($request->getQueryString('email')), '='));
         $customer = Customer::where('email', $email)->first();
 
@@ -130,16 +159,74 @@ class AuthController extends FrontendController
 
 
     public function login(Request $request)
-    {
-        $credentials = [
-            'email' => $request->input('email'),
-            'password' => $request->input('password')
-        ];
-        if (Auth::guard('customer')->attempt($credentials)) {
-            $user = Auth::guard('customer')->user();
-            $request->session()->regenerate();
-            return redirect()->route('home.index')->with('success', 'Đăng nhập thành công');
+{
+    $credentials = [
+        'email' => $request->input('email'),
+        'password' => $request->input('password')
+    ];
+
+    if (Auth::guard('customer')->attempt($credentials)) {
+        $user = Auth::guard('customer')->user();
+
+        if (!in_array($user->publish, [2, 3])) {
+            Auth::guard('customer')->logout();
+            return back()->withInput()->with('error', 'Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt.');
         }
-        return redirect()->route('home.index')->with('error', 'Email hoặc Mật khẩu không chính xác');
+
+        $request->session()->regenerate();
+        return redirect()->route('home.index')->with('success', 'Đăng nhập thành công');
+    }
+
+    return back()->withInput()->with('error', 'Email hoặc Mật khẩu không chính xác');
+}
+
+
+    public function registerCollaborator()
+    {
+        $seo = [
+            'meta_title' => 'Thông tin kích hoạt bảo hành',
+            'meta_keyword' => '',
+            'meta_description' => '',
+            'meta_image' => '',
+            'canonical' => route('customer.profile')
+        ];
+        $system = $this->system;
+        return view('frontend.auth.customer.register_collaborator', compact(
+            'seo',
+            'system'
+        ));
+    }
+
+    public function registerCollab(AuthRegisterRequest $request)
+    {
+        $existingCustomer = Customer::where('email', $request->input('email'))
+            ->orWhere('phone', $request->input('phone'))
+            ->first();
+
+        if ($existingCustomer) {
+            if ($existingCustomer->publish == 1) {
+                return redirect()->route('fe.auth.login')->with('success', 'Tài khoản của bạn đã được kích hoạt. Vui lòng đăng nhập.');
+            } else {
+                return redirect()->route('customer.register')->with('error', 'Email hoặc Số điện thoại đã được sử dụng.');
+            }
+        }
+
+        $description = "Số đơn tối thiểu: {$request->input('min_orders')}, "
+            . "Chi tiêu hàng tháng: {$request->input('monthly_spending')}, "
+            . "Giới thiệu bản thân: {$request->input('about_me')}";
+
+        $request->merge([
+            'customer_catalogue_id' => 1,
+            'publish' => 3,
+            'description' => $description,
+        ]);
+        $password=$request->password;
+        $customer=$this->customerService->create($request);
+        if ($customer) {
+            Mail::to($customer->email)->send(new AccountRegisteredMail($customer,$password));
+            return redirect()->route('fe.auth.login')->with('success', 'Đăng ký tài khoản thành công. Kiểm tra email của bạn.');
+        }
+
+        return redirect()->route('customer.register')->with('error', 'Thêm mới bản ghi không thành công. Hãy thử lại.');
     }
 }

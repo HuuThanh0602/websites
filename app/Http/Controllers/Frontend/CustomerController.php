@@ -216,13 +216,116 @@ class CustomerController extends FrontendController
         ));
     }
 
+
+    public function registerCustomer(Request $request)
+    {
+        $customer = Auth::guard('customer')->user();
+        $code = Auth::guard('customer')->user()->code;
+        $system = $this->system;
+        $provinces = Province::all();
+        $seo = [
+            'meta_title' => 'Trang quản lý tài khoản khách hàng' . $customer['name'],
+            'meta_keyword' => '',
+            'meta_description' => '',
+            'meta_image' => '',
+            'canonical' => route('customer.profile')
+        ];
+        return view('frontend.auth.customer.register_customer', compact(
+            'seo',
+            'system',
+            'customer',
+            'code',
+            'provinces',
+        ));
+    }
+    public function registerCustomer2(Request $request)
+    {
+        $validatedData = $request->validate([
+            'phone' => 'required|string|exists:customers,phone',
+            'referral_by' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (!empty($value)) {
+                        $referrer = Customer::where('phone', $value)->first();
+                        if (!$referrer) {
+                            $fail('Mã giới thiệu không hợp lệ.');
+                        }
+                    }
+                },
+            ],
+            'min_orders' => 'required|integer|min:1',
+            'monthly_spending' => 'required|integer|min:0',
+            'about_me' => 'required|string|max:500',
+        ], [
+            'phone.required' => 'Vui lòng nhập số điện thoại.',
+            'phone.exists' => 'Số điện thoại không tồn tại trong hệ thống.',
+
+            'min_orders.required' => 'Vui lòng nhập số đơn hàng tối thiểu/tháng.',
+            'min_orders.integer' => 'Số đơn hàng phải là số nguyên.',
+            'min_orders.min' => 'Số đơn hàng tối thiểu phải từ 1 trở lên.',
+
+            'monthly_spending.required' => 'Vui lòng nhập tổng chi tiêu/tháng.',
+            'monthly_spending.integer' => 'Tổng chi tiêu phải là số nguyên.',
+            'monthly_spending.min' => 'Tổng chi tiêu không thể nhỏ hơn 0.',
+
+            'about_me.required' => 'Vui lòng nhập giới thiệu bản thân.',
+            'about_me.string' => 'Giới thiệu bản thân phải là một chuỗi ký tự.',
+            'about_me.max' => 'Giới thiệu bản thân không được vượt quá 500 ký tự.',
+        ]);
+        $customer = Customer::where('phone', $validatedData['phone'])->first();
+
+        if (!$customer) {
+            return redirect()->back()->with('error', 'Không tìm thấy khách hàng!');
+        }
+
+        $description = "Số đơn tối thiểu: {$validatedData['min_orders']}, "
+            . "Chi tiêu hàng tháng: {$validatedData['monthly_spending']}, "
+            . "Giới thiệu bản thân: {$validatedData['about_me']}";
+        $customer->update([
+            'referral_by' => $validatedData['referral_by'] ?? null,
+            'customer_catalogue_id' => 3,
+            'publish' => 3,
+            'description' => $description,
+        ]);
+
+        return redirect()->back()->with('success', 'Đăng ký lên cộng tác viên thành công! Vui lòng chờ');
+    }
+
+
+
+
+    public function customer(Request $request)
+    {
+
+        $customer = Auth::guard('customer')->user();
+        $code = Auth::guard('customer')->user()->phone;
+        $system = $this->system;
+        $provinces = Province::all();
+        $collaborators = Customer::where('referral_by', $code)->get();
+        $seo = [
+            'meta_title' => 'Trang quản lý tài khoản khách hàng' . $customer['name'],
+            'meta_keyword' => '',
+            'meta_description' => '',
+            'meta_image' => '',
+            'canonical' => route('customer.profile')
+        ];
+        return view('frontend.auth.customer.customer', compact(
+            'seo',
+            'system',
+            'customer',
+            'code',
+            'collaborators',
+            'provinces',
+        ));
+    }
+
     public function createCustomer(Request $request)
     {
 
         $customer = Auth::guard('customer')->user();
-        $code = Auth::guard('customer')->user()->code;
+        $code = Auth::guard('customer')->user()->phone;
         $system = $this->system;
-        $provinces=Province::all();
+        $provinces = Province::all();
 
         $seo = [
             'meta_title' => 'Trang quản lý tài khoản khách hàng' . $customer['name'],
@@ -240,22 +343,24 @@ class CustomerController extends FrontendController
         ));
     }
     public function store(StoreCustomerRequest $request)
-{
-    $customer = new Customer();
-    $customer->email = $request->email;
-    $customer->name = $request->name;
-    $customer->referral_by = $request->referral_by ?? null; 
-    $customer->code = time();
-    $customer->customer_catalogue_id = 1;
-    $customer->password = bcrypt($request->password);
-    $customer->phone = $request->phone;
-    $customer->address = $request->address;
-    $customer->birthday = $request->birthday;
+    {
 
-    $customer->save();
+        $customer = new Customer();
+        $customer->email = $request->email;
+        $customer->name = $request->name;
+        $customer->publish = 3;
+        $customer->referral_by = $request->referral_by ?? null;
+        $customer->code = time();
+        $customer->customer_catalogue_id = 1;
+        $customer->password = bcrypt($request->password);
+        $customer->phone = $request->phone;
+        $customer->address = $request->address;
+        $customer->birthday = $request->birthday;
 
-    return redirect()->back()->with('success', 'Cộng tác viên đã được thêm mới thành công.');
-}
+        $customer->save();
+
+        return redirect()->back()->with('success', 'Cộng tác viên đã được thêm mới thành công.');
+    }
 
 
     public function cancelOrder($id)
@@ -278,7 +383,6 @@ class CustomerController extends FrontendController
         $customerID = Auth::guard('customer')->id();
 
         $wallet = Wallet::where('customer_id', $customerID)->first();
-
         if (!$wallet) {
             $wallet = Wallet::create([
                 'customer_id' => $customerID,
